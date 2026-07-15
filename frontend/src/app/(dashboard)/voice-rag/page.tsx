@@ -14,7 +14,7 @@ import { useAuthStore } from '@/store/auth';
 import api from '@/lib/axios';
 import {
   Mic2, ChevronDown, Network, FileText,
-  Sparkles, Volume2, Bot
+  Sparkles, Volume2, Bot, Database, Mic
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -348,13 +348,9 @@ export default function VoiceRagPage() {
           </div>
         </div>
 
-        {/* Document selector */}
-        <div className="w-64">
-          <DocSelector
-            value={selectedDoc?.id ?? ''}
-            onChange={(id, name) => setSelectedDoc({ id, name })}
-            disabled={isConnected}
-          />
+        {/* Header spacer */}
+        <div className="w-64 flex items-center justify-center">
+           <span className="text-[10px] text-text-muted/60 bg-bg-elevated/50 px-3 py-1 rounded-full border border-border/40">Multi-Document RAG Enabled</span>
         </div>
 
         <div className="flex items-center gap-2">

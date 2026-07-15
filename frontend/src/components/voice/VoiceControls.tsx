@@ -143,12 +143,12 @@ export function VoiceControls({
         ) : (
           <button
             onClick={onConnect}
-            disabled={!selectedDoc || agentState === 'connecting'}
-            title={!selectedDoc ? 'Select a document first' : 'Start voice session'}
+            disabled={agentState === 'connecting'}
+            title={'Start voice session'}
             className={cn(
               'flex h-8 items-center gap-1.5 rounded-full px-4 text-[11px] font-semibold text-white',
               'transition-all active:scale-95',
-              selectedDoc && agentState !== 'connecting'
+              agentState !== 'connecting'
                 ? 'bg-gradient-to-r from-accent-violet to-accent-cyan shadow-lg shadow-accent-violet/20 hover:opacity-90'
                 : 'bg-bg-elevated text-text-muted cursor-not-allowed border border-border'
             )}
