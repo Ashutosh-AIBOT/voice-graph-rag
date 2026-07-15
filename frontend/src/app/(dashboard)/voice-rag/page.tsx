@@ -125,6 +125,9 @@ export default function VoiceRagPage() {
   const sessionIdRef = useRef<string | null>(null);
   useEffect(() => { sessionIdRef.current = activeSessionId; }, [activeSessionId]);
 
+  // Deduplication for transcription segments
+  const seenSegmentIds = useRef<Set<string>>(new Set());
+
   // LiveKit token + room state
   const livekitRef = useRef<{ room: any; token: string; url: string } | null>(null);
 
@@ -151,20 +154,30 @@ export default function VoiceRagPage() {
 
       // 4. Track transcription via track metadata / text messages
       room.on(RoomEvent.TranscriptionReceived, (segments: any[]) => {
+        const localIdentity = room.localParticipant?.identity;
         segments.forEach((seg: any) => {
           if (seg.final) {
-            const sessId = sessionIdRef.current; // use ref to avoid stale closure
-            if (seg.participantIdentity === String(user.id)) {
+            // Deduplicate: skip if we've already saved this segment
+            const segKey = `${seg.id ?? seg.text}-${seg.participantIdentity}`;
+            if (seenSegmentIds.current.has(segKey)) return;
+            seenSegmentIds.current.add(segKey);
+            // Keep the dedup set bounded
+            if (seenSegmentIds.current.size > 200) seenSegmentIds.current.clear();
+
+            const sessId = sessionIdRef.current;
+            const isUser = seg.participantIdentity === localIdentity;
+            if (isUser) {
               // User turn finalised
-              if (sessId) addMessage(sessId, { role: 'user', content: seg.text, timestamp: Date.now() });
+              if (sessId && seg.text?.trim()) addMessage(sessId, { role: 'user', content: seg.text, timestamp: Date.now() });
               setLiveTranscript('');
             } else {
               // Agent turn finalised
-              if (sessId) addMessage(sessId, { role: 'assistant', content: seg.text, timestamp: Date.now() });
+              if (sessId && seg.text?.trim()) addMessage(sessId, { role: 'assistant', content: seg.text, timestamp: Date.now() });
               setAgentTranscript('');
             }
           } else {
-            if (seg.participantIdentity === String(user.id)) setLiveTranscript(seg.text);
+            const localIdentity2 = room.localParticipant?.identity;
+            if (seg.participantIdentity === localIdentity2) setLiveTranscript(seg.text);
             else setAgentTranscript(seg.text);
           }
         });

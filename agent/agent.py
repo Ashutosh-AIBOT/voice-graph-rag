@@ -24,13 +24,20 @@ CONTEXT_FILE = os.path.join(_agent_dir, "user_context.json")
 
 
 class Assistant(Agent):
-    def __init__(self) -> None:
+    def __init__(self, tools_ctx: 'GraphRAGTools') -> None:
         super().__init__(
-            instructions="""You are a helpful voice assistant for a document knowledge base.
-Always use the 'query_knowledge_graph' tool to find answers to any questions.
-Be extremely concise, direct, and conversational — you are speaking, not writing.
-Keep responses under 2-3 sentences where possible.
-When you retrieve facts, briefly mention the key concepts you found.""",
+            instructions=(
+                "You are a Voice AI assistant connected to a private document knowledge base. "
+                "You have ONE tool: 'query_knowledge_graph'. "
+                "RULE: For EVERY factual question, EVERY question about a document, topic, paper, concept, or technology — "
+                "you MUST call 'query_knowledge_graph' FIRST before answering. "
+                "DO NOT use your own memory or training knowledge to answer. "
+                "ONLY speak from what the tool returns. "
+                "If the user asks anything about Transformers, attention mechanisms, papers, architecture, etc., call the tool. "
+                "After getting the tool result, give a SHORT, conversational spoken answer (2-3 sentences max). "
+                "For pure greetings or small talk ONLY (e.g. 'hello', 'how are you'), you may respond without the tool."
+            ),
+            tools=[tools_ctx.query_knowledge_graph],
         )
 
 
@@ -168,8 +175,8 @@ async def entrypoint(ctx: JobContext):
     session = AgentSession(
         stt=stt.FallbackAdapter(
             [
-                inference.STT.from_model_string("assemblyai/universal-streaming:en"),
                 inference.STT.from_model_string("deepgram/nova-3"),
+                inference.STT.from_model_string("assemblyai/universal-streaming:en"),
             ]            
         ),
 
@@ -186,19 +193,7 @@ async def entrypoint(ctx: JobContext):
             "turn_detection": inference.TurnDetector(),
             "preemptive_generation": {"enabled": True}
         },
-        tools=[tools_ctx.query_knowledge_graph],
     )
-
-    # Pre-populate history with an EXTREMELY strong system prompt first
-    system_prompt = (
-        "You are an AI assistant bound to a private document database. "
-        "You have exactly one tool: 'query_knowledge_graph'. "
-        "YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. "
-        "For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. "
-        "INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! "
-        "NEVER say you cannot view documents. YOU CAN, by using the tool."
-    )
-    session.history.add_message(role="system", content=system_prompt)
 
     # Pre-populate history with past context (Limit to last 6 messages to save context window)
     for msg in past_messages[-6:]:
@@ -225,7 +220,7 @@ async def entrypoint(ctx: JobContext):
     # Start the session
     try:
         await session.start(
-            agent=Assistant(),
+            agent=Assistant(tools_ctx=tools_ctx),
             room=ctx.room,
             room_options=room_io.RoomOptions(
                 audio_input=room_io.AudioInputOptions(
@@ -276,7 +271,15 @@ async def request_fnc(req: agents.JobRequest) -> None:
     await req.accept()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    file_handler = logging.FileHandler("../pipeline_debug.log")
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s [%(levelname)s] AGENT:%(lineno)d - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[logging.StreamHandler(), file_handler]
+    )
     agents.cli.run_app(
         agents.WorkerOptions(
             entrypoint_fnc=entrypoint,
