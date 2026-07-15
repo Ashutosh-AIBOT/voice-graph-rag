@@ -191,7 +191,10 @@ async def entrypoint(ctx: JobContext):
         vad=silero.VAD.load(),
         turn_handling={
             "turn_detection": inference.TurnDetector(),
-            "preemptive_generation": {"enabled": True}
+            # DISABLED: preemptive_generation causes two simultaneous pipeline triggers.
+            # It fires the LLM before the full turn ends (no tool call) → generic answer.
+            # Then tool fires on turn end → document answer. Result: 2 agents speaking at once.
+            "preemptive_generation": {"enabled": False},
         },
     )
 
