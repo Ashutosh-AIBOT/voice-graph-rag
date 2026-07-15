@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from livekit import agents
 from livekit.agents import Agent, AgentServer, AgentSession, JobContext, room_io, llm
-from livekit.plugins import noise_cancellation, silero
+from livekit.plugins import noise_cancellation, silero, openai
 from livekit.agents import stt, tts, inference
 from livekit.agents import AgentStateChangedEvent, MetricsCollectedEvent, metrics
 import httpx
@@ -41,6 +41,7 @@ class Assistant(Agent):
                 f"{summary_instruction}"
                 "If the user asks anything about Transformers, attention mechanisms, papers, architecture, etc., call the tool. "
                 "After getting the tool result, give a SHORT, conversational spoken answer (2-3 sentences max). "
+                "CRITICAL: If the tool returns an error or fails, you MUST apologize and state the error. DO NOT try to answer from your own knowledge. "
                 "For pure greetings or small talk ONLY (e.g. 'hello', 'how are you'), you may respond without the tool."
             ),
             tools=[tools_ctx.query_knowledge_graph],
@@ -86,7 +87,7 @@ class GraphRAGTools:
                     f"{api_url}/api/query/",
                     json=payload,
                     headers=headers,
-                    timeout=30.0,
+                    timeout=60.0,
                 )
 
                 if response.status_code == 200:
@@ -208,7 +209,7 @@ async def entrypoint(ctx: JobContext):
             ]            
         ),
 
-        llm=inference.LLM.from_model_string("openai/gpt-4o"),
+        llm=openai.LLM(model="gpt-4o", parallel_tool_calls=False),
 
         tts=tts.FallbackAdapter(
             [

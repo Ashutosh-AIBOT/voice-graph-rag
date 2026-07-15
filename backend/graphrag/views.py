@@ -1312,10 +1312,13 @@ class LiveKitTokenView(APIView):
         doc_summaries = []
         valid_doc_ids = []
 
+        import uuid
+        random_id = uuid.uuid4().hex[:8]
+
         if "default" in doc_ids or doc_ids == ["default"]:
             doc_name = "General Chat"
             doc_summary = ""
-            room_name = f"user-{request.user.id}-doc-default-voice-rag"
+            room_name = f"user-{request.user.id}-doc-default-{random_id}-voice-rag"
             doc_ids_json = '["default"]'
         else:
             # Verify the documents belong to the requesting user
@@ -1345,10 +1348,10 @@ class LiveKitTokenView(APIView):
                 else:
                     doc_summary = "\n\n".join([f"--- {name} ---\n{summary}" for name, summary in zip(doc_names, doc_summaries) if summary])
                 
-                # Generate a deterministic room name based on sorted IDs
+                # Generate a unique room name for every session to prevent ghost agents
                 import hashlib
                 hash_id = hashlib.md5(",".join(sorted(valid_doc_ids)).encode()).hexdigest()[:12]
-                room_name = f"user-{request.user.id}-multi-{hash_id}-voice-rag"
+                room_name = f"user-{request.user.id}-multi-{hash_id}-{random_id}-voice-rag"
                 doc_ids_json = json.dumps(valid_doc_ids)
             except (ValueError, ValidationError):
                 return Response(

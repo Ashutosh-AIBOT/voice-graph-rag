@@ -18,10 +18,8 @@ interface GraphHighlightMessage {
  * Must be used inside a <LiveKitRoom> component tree.
  */
 export function useLiveKitGraphSync(activeSessionId: string | null) {
-  const setAnimatingNode = useGraphStore((s) => s.setAnimatingNode);
-  const addRagHighlight = useGraphStore((s) => s.addRagHighlight);
   const clearRagHighlights = useGraphStore((s) => s.clearRagHighlights);
-  const setHighlighted = useGraphStore((s) => s.setHighlighted);
+  const animateHighlightSequence = useGraphStore((s) => s.animateHighlightSequence);
   const addMessage = useVoiceChatStore((s) => s.addMessage);
 
   // Track timeouts to prevent race conditions
@@ -38,31 +36,8 @@ export function useLiveKitGraphSync(activeSessionId: string | null) {
       const ids = sorted.map((e) => e.id);
       const names = sorted.map((e) => e.name);
 
-      // Clear previous RAG highlights before new turn
-      clearRagHighlights();
-      setHighlighted([], []);
-
-      // Clear any existing staggered animations to prevent race conditions
-      timeoutIds.current.forEach(clearTimeout);
-      timeoutIds.current = [];
-
-      // Animate one-by-one with 400 ms stagger
-      sorted.forEach((entity, i) => {
-        // Phase 1: gold pulse on this node
-        timeoutIds.current.push(setTimeout(() => {
-          setAnimatingNode(entity.id);
-          addRagHighlight(entity.id);
-        }, i * 450));
-
-        // Phase 2: clear the gold pulse (leave teal glow)
-        timeoutIds.current.push(setTimeout(() => {
-          setAnimatingNode(null);
-        }, i * 450 + 400));
-      });
-
-      // After all animations: set full highlighted set for standard dim behaviour
-      timeoutIds.current.push(setTimeout(() => {
-        setHighlighted(ids, []);
+      // Use the global staggered animation
+      animateHighlightSequence(ids, () => {
         // Store cited node names in the last assistant message
         const sessId = activeSessionRef.current;
         if (sessId) {
@@ -73,9 +48,9 @@ export function useLiveKitGraphSync(activeSessionId: string | null) {
             citedNodes: names,
           });
         }
-      }, sorted.length * 450 + 100);
+      });
     },
-    [clearRagHighlights, setHighlighted, setAnimatingNode, addRagHighlight, addMessage]
+    [animateHighlightSequence, addMessage]
   );
 
   // Register DataChannel listener on the LiveKit room via window event
