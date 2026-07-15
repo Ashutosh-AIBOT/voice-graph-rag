@@ -28,3 +28,5 @@ livekit-plugins-deepgram
 livekit-plugins-openai
 livekit-plugins-anthropic
 livekit-plugins-cartesia
+livekit-plugins-turn-detector
+livekit-plugins-elevenlabs
