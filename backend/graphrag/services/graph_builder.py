@@ -151,15 +151,12 @@ class GraphBuilder:
 
             def process_section(sec: dict) -> tuple[List[dict], List[dict]]:
                 """Process a single section: extract entities and relationships."""
-                import time
                 text = sec["text"]
                 page = sec["page"]
-                time.sleep(2)
                 ents = self.entity_extractor.extract_entities(text)
                 for e in ents:
                     e["page"] = page
                     e["source_doc"] = doc.name
-                time.sleep(2)
                 rels = self.relationship_extractor.extract_relationships(text)
                 for r in rels:
                     r["page"] = page
@@ -192,6 +189,8 @@ class GraphBuilder:
 
             if failed_count == total_sections and total_sections > 0:
                 raise RuntimeError(f"All sections failed to process. Last error: {last_error}")
+            elif failed_count > 0:
+                doc.error_message = f"Warning: {failed_count} sections failed to parse correctly. Graph may be incomplete."
 
             # 3b. Resolve summary
             try:
@@ -222,7 +221,7 @@ class GraphBuilder:
             doc.entity_count = len(resolved_ents)
             doc.relationship_count = len(rewritten_rels)
             doc.status = Document.Status.COMPLETED
-            doc.error_message = None
+            doc.error_message = doc.error_message if failed_count > 0 else None
             doc.processing_progress = 100
             doc.processing_step = "Complete"
             doc.save()

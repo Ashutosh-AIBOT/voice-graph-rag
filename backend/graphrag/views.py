@@ -238,6 +238,21 @@ class DocumentUploadView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        try:
+            import magic
+            file_obj.seek(0)
+            mime_type = magic.from_buffer(file_obj.read(2048), mime=True)
+            file_obj.seek(0)
+            
+            allowed_mimes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']
+            if mime_type not in allowed_mimes and not mime_type.startswith('text/'):
+                return Response(
+                    {"error": f"Invalid file content. Detected MIME type: {mime_type}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except ImportError:
+            logger.warning("python-magic not installed; skipping strict MIME type validation.")
+
         if file_obj.size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
             return Response(
                 {"error": f"File size exceeds {settings.MAX_UPLOAD_SIZE_MB}MB limit."},
