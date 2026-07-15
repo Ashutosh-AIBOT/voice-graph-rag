@@ -58,9 +58,11 @@ interface GraphState {
   addRagHighlight: (id: string) => void;
   /** Clear all RAG animation state (on new turn / new chat) */
   clearRagHighlights: () => void;
+  animationTimeouts: NodeJS.Timeout[];
+  animateHighlightSequence: (entityIds: string[], onComplete?: () => void) => void;
 }
 
-export const useGraphStore = create<GraphState>((set) => ({
+export const useGraphStore = create<GraphState>((set, get) => ({
   data: { nodes: [], links: [] },
   highlightedEntities: [],
   highlightedPaths: [],
@@ -71,10 +73,14 @@ export const useGraphStore = create<GraphState>((set) => ({
   dim: 2,
   activeAnimatingNode: null,
   ragHighlightedIds: [],
+  animationTimeouts: [],
   setData: (data) => set({ data }),
   setHighlighted: (entities, paths = []) =>
     set({ highlightedEntities: entities, highlightedPaths: paths }),
-  clearHighlighted: () => set({ highlightedEntities: [], highlightedPaths: [] }),
+  clearHighlighted: () => {
+    get().animationTimeouts.forEach(clearTimeout);
+    set({ highlightedEntities: [], highlightedPaths: [] });
+  },
   setSearchTerm: (term) => set({ searchTerm: term }),
   toggleType: (type) =>
     set((state) => ({
@@ -96,5 +102,36 @@ export const useGraphStore = create<GraphState>((set) => ({
         ? state.ragHighlightedIds
         : [...state.ragHighlightedIds, id],
     })),
-  clearRagHighlights: () => set({ ragHighlightedIds: [], activeAnimatingNode: null }),
+  clearRagHighlights: () => {
+    get().animationTimeouts.forEach(clearTimeout);
+    set({ ragHighlightedIds: [], activeAnimatingNode: null, animationTimeouts: [] });
+  },
+  animateHighlightSequence: (entityIds, onComplete) => {
+    const state = get();
+    state.clearRagHighlights();
+    state.setHighlighted([], []);
+
+    const timeouts: NodeJS.Timeout[] = [];
+    
+    entityIds.forEach((id, i) => {
+      // Phase 1: gold pulse
+      timeouts.push(setTimeout(() => {
+        get().setAnimatingNode(id);
+        get().addRagHighlight(id);
+      }, i * 450));
+
+      // Phase 2: clear gold pulse
+      timeouts.push(setTimeout(() => {
+        get().setAnimatingNode(null);
+      }, i * 450 + 400));
+    });
+
+    // Final phase: Set regular highlights and run callback
+    timeouts.push(setTimeout(() => {
+      get().setHighlighted(entityIds, []);
+      if (onComplete) onComplete();
+    }, entityIds.length * 450 + 100));
+
+    set({ animationTimeouts: timeouts });
+  },
 }));

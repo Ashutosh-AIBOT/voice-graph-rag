@@ -142,6 +142,7 @@ export function VoiceControls({
           </button>
         ) : (
           <button
+            data-testid="connect-rag-button"
             onClick={onConnect}
             disabled={agentState === 'connecting'}
             title={'Start voice session'}

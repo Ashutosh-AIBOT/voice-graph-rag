@@ -125,7 +125,13 @@ export function MainQueryView() {
         conclusion: res.conclusion,
       };
       setResult(mapped);
-      setHighlighted(mapped.entities || [], mapped.paths || []);
+      if (mapped.entities && mapped.entities.length > 0) {
+        useGraphStore.getState().animateHighlightSequence(mapped.entities, () => {
+          setHighlighted(mapped.entities || [], mapped.paths || []);
+        });
+      } else {
+        setHighlighted([], mapped.paths || []);
+      }
 
       addHistoryItem({
         id: Date.now().toString(),
