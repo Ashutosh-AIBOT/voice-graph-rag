@@ -22,6 +22,7 @@ class HybridRetriever:
         graph_context = ""
         try:
             graph_context = self.graph_retriever.retrieve_graph_context(query, user_id, hops=2, doc_names=doc_names)
+            logger.info("=== HYBRID PIPELINE STEP 1: GRAPH RETRIEVAL ===\n%s\n===============================================", graph_context if graph_context else "NO GRAPH CONTEXT FOUND")
         except Exception as e:
             logger.error("Graph retrieval failed during hybrid step. Error: %s", str(e))
 
@@ -42,6 +43,7 @@ class HybridRetriever:
                     f"\"{chunk['text'].strip()}\"\n"
                 )
         vector_context = "\n".join(vector_context_lines)
+        logger.info("=== HYBRID PIPELINE STEP 2: VECTOR RETRIEVAL ===\n%s\n===============================================", vector_context if vector_context else "NO VECTOR CONTEXT FOUND")
 
         # 4. Auto-detect Strategy Route based on context availability
         strategy = "HYBRID"
@@ -63,6 +65,7 @@ class HybridRetriever:
             )
 
         logger.info("Selected retrieval strategy: %s for query: '%s'", strategy, query)
+        logger.info("=== HYBRID PIPELINE STEP 3: AGGREGATED CONTEXT ===\n%s\n==================================================", combined_context)
         
         return {
             "combined_context": combined_context,

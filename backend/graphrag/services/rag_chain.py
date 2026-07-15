@@ -164,6 +164,9 @@ class RAGChain:
 
         # 3. Call LLM
         try:
+            formatted_prompt = prompt.format(context=context if context else "No context available.", query=query)
+            logger.info("=== HYBRID PIPELINE STEP 4: FINAL LLM PROMPT ===\n%s\n==================================================", formatted_prompt)
+            
             chain = prompt | self.llm
             response = chain.invoke({
                 "context": context if context else "No context available.",

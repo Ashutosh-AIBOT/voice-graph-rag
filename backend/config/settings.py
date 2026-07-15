@@ -239,6 +239,11 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'detailed',
         },
+        'pipeline_debug': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR.parent / 'pipeline_debug.log',
+            'formatter': 'detailed',
+        },
     },
     'loggers': {
         '': {
@@ -251,7 +256,7 @@ LOGGING = {
             'propagate': False,
         },
         'graphrag': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'pipeline_debug'],
             'level': 'INFO',
             'propagate': False,
         },
