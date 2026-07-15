@@ -173,12 +173,7 @@ async def entrypoint(ctx: JobContext):
             ]            
         ),
 
-        llm=llm.FallbackAdapter(
-            [
-                inference.LLM.from_model_string("openai/gpt-4o-mini"),
-                inference.LLM.from_model_string("anthropic/claude-3.5-sonnet"),
-            ]            
-        ),
+        llm=inference.LLM.from_model_string("openai/gpt-4o"),
 
         tts=tts.FallbackAdapter(
             [
