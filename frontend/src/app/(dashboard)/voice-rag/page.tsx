@@ -28,77 +28,8 @@ type AgentState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' 
 
 import { AvatarPanel } from '@/components/voice/AvatarPanel';
 
-/** Document selector chip panel */
-function MultiDocSelector() {
-  const documents = useDocumentsStore((s) => s.documents).filter((d) => d.status === 'COMPLETED');
-  const selectedIds = useDocumentsStore((s) => s.selectedDocumentIds);
-  const toggleSelectDocument = useDocumentsStore((s) => s.toggleSelectDocument);
-
-  if (documents.length === 0) {
-    return <div className="text-[11px] text-text-muted italic px-2">No documents available. Upload in Documents tab.</div>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => {
-          if (selectedIds.length === 0) {
-            useDocumentsStore.getState().selectAllDocuments();
-          } else {
-            useDocumentsStore.getState().deselectAllDocuments();
-          }
-        }}
-        className={cn(
-          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors",
-          selectedIds.length === 0
-            ? "bg-bg-elevated border-border/60 text-text-muted hover:border-border hover:text-text-primary"
-            : "bg-accent-violet/10 border-accent-violet text-accent-violet"
-        )}
-      >
-        {selectedIds.length === 0 ? "Select All" : "Clear All"}
-      </button>
-      {documents.map((doc) => {
-        const isSelected = selectedIds.includes(doc.id);
-        return (
-          <button
-            key={doc.id}
-            onClick={() => toggleSelectDocument(doc.id)}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors",
-              isSelected 
-                ? "bg-accent-violet/10 border-accent-violet text-accent-violet" 
-                : "bg-bg-elevated border-border/60 text-text-muted hover:border-border hover:text-text-primary"
-            )}
-          >
-            <FileText className="h-3 w-3 shrink-0" />
-            <span className="truncate max-w-[150px]">{doc.name}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Floating legend for the RAG animation colours */
-function GraphLegendBadges() {
-  return (
-    <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-1.5 rounded-lg border border-border/60 bg-bg-sidebar/80 backdrop-blur-sm p-2.5">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-text-muted/70 mb-0.5">Graph Legend</p>
-      <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-yellow-400 shadow-[0_0_6px_#FFD700]" />
-        <span className="text-[10px] text-text-secondary">Currently Cited</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_6px_theme(colors.cyan.400)]" />
-        <span className="text-[10px] text-text-secondary">Previously Cited</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-bg-elevated border border-border/60" />
-        <span className="text-[10px] text-text-secondary">Other Nodes</span>
-      </div>
-    </div>
-  );
-}
+import { MultiDocSelector } from '@/components/voice/MultiDocSelector';
+import { GraphLegendBadges, NodeHighlightBadge, GraphEmptyOverlay } from '@/components/graph/GraphBadges';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Page
@@ -327,6 +258,7 @@ export default function VoiceRagPage() {
                   <MultiDocSelector />
                   
                   <button
+                    data-testid="connect-rag-button"
                     onClick={handleConnect}
                     className="w-full mt-4 flex items-center justify-center gap-2 rounded-lg bg-accent-violet hover:bg-accent-violet/90 py-2.5 font-bold text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all active:scale-[0.98]"
                   >
@@ -434,29 +366,4 @@ export default function VoiceRagPage() {
   );
 }
 
-/** Small badge showing how many nodes are currently highlighted */
-function NodeHighlightBadge() {
-  const ragHighlightedIds = useGraphStore((s) => s.ragHighlightedIds);
-  if (ragHighlightedIds.length === 0) return null;
-  return (
-    <div className="flex items-center gap-1.5 rounded-full border border-accent-cyan/30 bg-accent-cyan/10 px-3 py-1">
-      <Network className="h-3 w-3 text-accent-cyan" />
-      <span className="text-[11px] font-semibold text-accent-cyan">
-        {ragHighlightedIds.length} node{ragHighlightedIds.length !== 1 ? 's' : ''} cited
-      </span>
-    </div>
-  );
-}
 
-/** Overlay shown when graph has no data yet */
-function GraphEmptyOverlay() {
-  const nodes = useGraphStore((s) => s.data.nodes);
-  if (nodes.length > 0) return null;
-  return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-bg-base/60 backdrop-blur-sm">
-      <Network className="h-10 w-10 text-text-muted/30" />
-      <p className="text-sm font-medium text-text-muted/60">No graph data yet</p>
-      <p className="text-xs text-text-muted/40">Upload and process a document to see the knowledge graph</p>
-    </div>
-  );
-}

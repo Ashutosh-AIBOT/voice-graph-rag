@@ -10,8 +10,12 @@ from livekit.plugins import noise_cancellation, silero
 from livekit.agents import stt, tts, inference
 from livekit.agents import AgentStateChangedEvent, MetricsCollectedEvent, metrics
 import httpx
+import asyncio
 
 logger = logging.getLogger(__name__)
+
+# Lock for async file writing to prevent data corruption
+context_lock = asyncio.Lock()
 
 # Load agent-specific .env first, then fall back to parent-level .env
 _agent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -275,13 +279,17 @@ async def entrypoint(ctx: JobContext):
                 )
 
         try:
-            saved = {}
-            if os.path.exists(CONTEXT_FILE):
-                with open(CONTEXT_FILE, "r") as f:
-                    saved = json.load(f)
-            saved[participant.identity] = updated_messages
-            with open(CONTEXT_FILE, "w") as f:
-                json.dump(saved, f, indent=2)
+            import aiofiles
+            async with context_lock:
+                saved = {}
+                if os.path.exists(CONTEXT_FILE):
+                    async with aiofiles.open(CONTEXT_FILE, "r") as f:
+                        content = await f.read()
+                        if content.strip():
+                            saved = json.loads(content)
+                saved[participant.identity] = updated_messages
+                async with aiofiles.open(CONTEXT_FILE, "w") as f:
+                    await f.write(json.dumps(saved, indent=2))
             logger.info(
                 "Saved %d messages for participant %s",
                 len(updated_messages), participant.identity,

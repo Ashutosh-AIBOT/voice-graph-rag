@@ -24,6 +24,9 @@ export function useLiveKitGraphSync(activeSessionId: string | null) {
   const setHighlighted = useGraphStore((s) => s.setHighlighted);
   const addMessage = useVoiceChatStore((s) => s.addMessage);
 
+  // Track timeouts to prevent race conditions
+  const timeoutIds = useRef<NodeJS.Timeout[]>([]);
+
   // Keep a stable ref to avoid stale closures in event handlers
   const activeSessionRef = useRef(activeSessionId);
   useEffect(() => { activeSessionRef.current = activeSessionId; }, [activeSessionId]);
@@ -39,22 +42,26 @@ export function useLiveKitGraphSync(activeSessionId: string | null) {
       clearRagHighlights();
       setHighlighted([], []);
 
+      // Clear any existing staggered animations to prevent race conditions
+      timeoutIds.current.forEach(clearTimeout);
+      timeoutIds.current = [];
+
       // Animate one-by-one with 400 ms stagger
       sorted.forEach((entity, i) => {
         // Phase 1: gold pulse on this node
-        setTimeout(() => {
+        timeoutIds.current.push(setTimeout(() => {
           setAnimatingNode(entity.id);
           addRagHighlight(entity.id);
-        }, i * 450);
+        }, i * 450));
 
         // Phase 2: clear the gold pulse (leave teal glow)
-        setTimeout(() => {
+        timeoutIds.current.push(setTimeout(() => {
           setAnimatingNode(null);
-        }, i * 450 + 400);
+        }, i * 450 + 400));
       });
 
       // After all animations: set full highlighted set for standard dim behaviour
-      setTimeout(() => {
+      timeoutIds.current.push(setTimeout(() => {
         setHighlighted(ids, []);
         // Store cited node names in the last assistant message
         const sessId = activeSessionRef.current;
@@ -87,7 +94,10 @@ export function useLiveKitGraphSync(activeSessionId: string | null) {
     };
 
     window.addEventListener('livekit:data', handler);
-    return () => window.removeEventListener('livekit:data', handler);
+    return () => {
+      window.removeEventListener('livekit:data', handler);
+      timeoutIds.current.forEach(clearTimeout);
+    };
   }, [handleGraphHighlight]);
 
   return { clearRagHighlights };

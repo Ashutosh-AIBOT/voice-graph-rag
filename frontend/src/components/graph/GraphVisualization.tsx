@@ -44,8 +44,6 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
   const [hoverNode, setHoverNode] = useState<FGNode | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: GraphNode } | null>(null);
   const [initialized, setInitialized] = useState(false);
-  // Animation frame counter for pulsing ring
-  const animFrameRef = useRef(0);
 
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
@@ -168,8 +166,8 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
 
     // ── RAG active node: gold expanding pulse ring ──────────────────────────
     if (isRagActive) {
-      animFrameRef.current = (animFrameRef.current + 1) % 60;
-      const pulse = 0.5 + 0.5 * Math.sin((animFrameRef.current / 60) * Math.PI * 2);
+      const time = Date.now();
+      const pulse = 0.5 + 0.5 * Math.sin((time / 200) * Math.PI);
       const ringR = r + 6 + pulse * 6;
       ctx.shadowBlur = 30 + pulse * 20;
       ctx.shadowColor = '#FFD700';
