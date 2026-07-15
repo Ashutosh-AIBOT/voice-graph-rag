@@ -9,7 +9,7 @@ from .entity_extractor import EntityExtractor
 from .relationship_extractor import RelationshipExtractor
 from .entity_resolver import EntityResolver
 from .vector_retriever import VectorRetriever
-
+from .document_summarizer import DocumentSummarizer
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ class GraphBuilder:
         self.relationship_extractor = RelationshipExtractor()
         self.entity_resolver = EntityResolver()
         self.vector_retriever = VectorRetriever()
+        self.document_summarizer = DocumentSummarizer()
 
     def _update_progress(self, doc, step: str, progress: int):
         """Update document processing progress for frontend polling."""
@@ -169,7 +170,10 @@ class GraphBuilder:
             completed = 0
             failed_count = 0
             last_error = None
-            with ThreadPoolExecutor(max_workers=1) as executor:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                # Spawn summary task
+                summary_future = executor.submit(self.document_summarizer.generate_summary, full_text[:3000])
+                
                 futures = {executor.submit(process_section, sec): sec for sec in sections}
                 for future in as_completed(futures):
                     try:
@@ -188,6 +192,15 @@ class GraphBuilder:
 
             if failed_count == total_sections and total_sections > 0:
                 raise RuntimeError(f"All sections failed to process. Last error: {last_error}")
+
+            # 3b. Resolve summary
+            try:
+                doc_summary = summary_future.result(timeout=60)
+                if doc_summary:
+                    doc.summary = doc_summary
+                    doc.save(update_fields=['summary'])
+            except Exception as e:
+                logger.error("Failed to fetch document summary from future: %s", str(e))
 
             # 4. Run entity resolution (deduplicate entities and rewrite relationships)
             self._update_progress(doc, "Resolving duplicates...", 80)

@@ -24,7 +24,8 @@ CONTEXT_FILE = os.path.join(_agent_dir, "user_context.json")
 
 
 class Assistant(Agent):
-    def __init__(self, tools_ctx: 'GraphRAGTools') -> None:
+    def __init__(self, tools_ctx: 'GraphRAGTools', doc_summary: str = "") -> None:
+        summary_instruction = f"DOCUMENT SUMMARY: {doc_summary} (Use this to answer general questions about what the document is about). " if doc_summary else ""
         super().__init__(
             instructions=(
                 "You are a Voice AI assistant connected to a private document knowledge base. "
@@ -33,6 +34,7 @@ class Assistant(Agent):
                 "you MUST call 'query_knowledge_graph' FIRST before answering. "
                 "DO NOT use your own memory or training knowledge to answer. "
                 "ONLY speak from what the tool returns. "
+                f"{summary_instruction}"
                 "If the user asks anything about Transformers, attention mechanisms, papers, architecture, etc., call the tool. "
                 "After getting the tool result, give a SHORT, conversational spoken answer (2-3 sentences max). "
                 "For pure greetings or small talk ONLY (e.g. 'hello', 'how are you'), you may respond without the tool."
@@ -134,18 +136,30 @@ async def entrypoint(ctx: JobContext):
     participant = await ctx.wait_for_participant()
     logger.info("Participant joined: %s", participant.identity)
 
-    # Parse user_id and doc_id from room name: user-<user_id>-doc-<doc_id>-voice-rag
+    # Parse metadata from token
+    doc_summary = ""
     user_id = None
     doc_id = None
-    try:
-        room_name = ctx.room.name
-        if "-doc-" in room_name:
-            parts = room_name.split("-doc-", 1)
-            user_id = parts[0].replace("user-", "").strip()
-            doc_id = parts[1].replace("-voice-rag", "").strip()
-        logger.info("Parsed from room name: user_id=%s, doc_id=%s", user_id, doc_id)
-    except Exception as e:
-        logger.error("Error parsing room name %s: %s", ctx.room.name, e)
+    if participant.metadata:
+        try:
+            meta = json.loads(participant.metadata)
+            doc_summary = meta.get("doc_summary", "")
+            user_id = meta.get("user_id")
+            doc_id = meta.get("doc_id")
+        except Exception as e:
+            logger.error("Failed to parse participant metadata: %s", e)
+
+    # Fallback to parsing from room name if metadata parsing failed or missing
+    if not user_id or not doc_id:
+        try:
+            room_name = ctx.room.name
+            if "-doc-" in room_name:
+                parts = room_name.split("-doc-", 1)
+                user_id = parts[0].replace("user-", "").strip()
+                doc_id = parts[1].replace("-voice-rag", "").strip()
+            logger.info("Parsed from room name: user_id=%s, doc_id=%s", user_id, doc_id)
+        except Exception as e:
+            logger.error("Error parsing room name %s: %s", ctx.room.name, e)
 
     if not user_id or not doc_id:
         logger.warning(
@@ -171,6 +185,8 @@ async def entrypoint(ctx: JobContext):
         except Exception as e:
             logger.error("Failed to load user context: %s", e)
 
+    preemptive_enabled = (doc_id == "default" or not doc_id)
+
     # Build the session with STT → LLM → TTS pipeline
     session = AgentSession(
         stt=stt.FallbackAdapter(
@@ -191,10 +207,9 @@ async def entrypoint(ctx: JobContext):
         vad=silero.VAD.load(),
         turn_handling={
             "turn_detection": inference.TurnDetector(),
-            # DISABLED: preemptive_generation causes two simultaneous pipeline triggers.
-            # It fires the LLM before the full turn ends (no tool call) → generic answer.
-            # Then tool fires on turn end → document answer. Result: 2 agents speaking at once.
-            "preemptive_generation": {"enabled": False},
+            # Dynamic Preemptive Mode: ON for general chat (no doc), OFF for RAG mode
+            # If enabled during RAG, LLM will fire early and generate generic responses before tool call completes
+            "preemptive_generation": {"enabled": preemptive_enabled},
         },
     )
 
@@ -223,7 +238,7 @@ async def entrypoint(ctx: JobContext):
     # Start the session
     try:
         await session.start(
-            agent=Assistant(tools_ctx=tools_ctx),
+            agent=Assistant(tools_ctx=tools_ctx, doc_summary=doc_summary),
             room=ctx.room,
             room_options=room_io.RoomOptions(
                 audio_input=room_io.AudioInputOptions(

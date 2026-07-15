@@ -141,7 +141,7 @@ export default function VoiceRagPage() {
     try {
       // 1. Fetch token from backend
       const { data } = await api.post('/livekit-token/', { doc_id: selectedDoc.id });
-      const { token, url, room: roomName } = data as { token: string; url: string; room: string };
+      const { token, url, room: roomName, doc_summary } = data as { token: string; url: string; room: string; doc_summary?: string };
 
       // 2. Dynamically import LiveKit client (avoids SSR issues)
       const { Room, RoomEvent, DataPacket_Kind } = await import('livekit-client');
@@ -232,6 +232,14 @@ export default function VoiceRagPage() {
       // 6. Create a new chat session
       const sessId = createSession(selectedDoc.id, selectedDoc.name);
       setActiveSessionId(sessId);
+      
+      if (doc_summary) {
+        addMessage(sessId, { 
+          role: 'assistant', 
+          content: `📚 **Document Context Loaded**\n\n${doc_summary}`, 
+          timestamp: Date.now() 
+        });
+      }
     } catch (err) {
       console.error('LiveKit connect error:', err);
       setAgentState('error');

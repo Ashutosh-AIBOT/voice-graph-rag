@@ -77,10 +77,17 @@ export function DocumentRow({
           <ProcessingSteps currentStep={doc.processingStep} status={doc.status} />
         </div>
       ) : (
-        <div className="mt-2 pl-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
-          {doc.entities !== undefined && <span>{doc.entities} entities</span>}
-          {doc.relationships !== undefined && <span>{doc.relationships} relations</span>}
-          <span>{formatDate(doc.uploadedAt)}</span>
+        <div className="mt-2 pl-6 flex flex-col gap-1 text-xs text-text-muted">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {doc.entities !== undefined && <span>{doc.entities} entities</span>}
+            {doc.relationships !== undefined && <span>{doc.relationships} relations</span>}
+            <span>{formatDate(doc.uploadedAt)}</span>
+          </div>
+          {doc.summary && (
+            <div className="mt-1 p-2 rounded bg-bg-elevated/50 border border-border/30 text-[11px] leading-relaxed italic border-l-2 border-l-accent-violet">
+              {doc.summary}
+            </div>
+          )}
         </div>
       )}
 

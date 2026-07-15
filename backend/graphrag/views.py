@@ -1289,12 +1289,15 @@ class LiveKitTokenView(APIView):
             )
 
         doc_name = "General Chat"
+        doc_summary = ""
         if doc_id != "default":
             # Verify the document belongs to the requesting user
             try:
                 from django.core.exceptions import ValidationError
                 doc = Document.objects.get(id=doc_id, user=request.user)
                 doc_name = doc.name
+                # Use getattr for now until Phase 2 adds the summary field to the model
+                doc_summary = getattr(doc, 'summary', "")
             except (Document.DoesNotExist, ValueError, ValidationError):
                 return Response(
                     {"error": "Document not found or access denied."},
@@ -1337,6 +1340,7 @@ class LiveKitTokenView(APIView):
                     "user_id": str(request.user.id),
                     "doc_id": str(doc_id),
                     "doc_name": doc_name,
+                    "doc_summary": doc_summary,
                 }))
                 .to_jwt()
             )
@@ -1373,6 +1377,7 @@ class LiveKitTokenView(APIView):
                 "room": room_name,
                 "url": livekit_url,
                 "doc_name": doc_name,
+                "doc_summary": doc_summary,
             }, status=status.HTTP_200_OK)
 
         except ImportError:

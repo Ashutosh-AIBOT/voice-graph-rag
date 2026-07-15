@@ -25,6 +25,7 @@ export function useDocumentPolling(enabled = true) {
           uploadedAt: d.uploaded_at ?? d.created_at,
           error: d.error_message,
           source: d.source || '',
+          summary: d.summary || '',
           processingStep: d.processing_step ?? d.processingStep ?? null,
           processingProgress: d.processing_progress ?? d.processingProgress ?? 0,
         }));
@@ -56,6 +57,7 @@ export function useDocumentPolling(enabled = true) {
           uploadedAt: d.uploaded_at ?? d.created_at,
           error: d.error_message,
           source: d.source || '',
+          summary: d.summary || '',
           processingStep: d.processing_step ?? d.processingStep ?? null,
           processingProgress: d.processing_progress ?? d.processingProgress ?? 0,
         }));

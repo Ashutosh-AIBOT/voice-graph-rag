@@ -12,6 +12,7 @@ export interface DocumentItem {
   uploadedAt: string;
   error?: string;
   source?: string;
+  summary?: string;
   processingStep?: string | null;
   processingProgress?: number;
 }

@@ -1,28 +1,40 @@
 {
   "b85795fc-587a-4b32-a1fa-5d0f5ebba984": [
     {
-      "role": "system",
-      "content": "You are an AI assistant bound to a private document database. You have exactly one tool: 'query_knowledge_graph'. YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! NEVER say you cannot view documents. YOU CAN, by using the tool."
+      "role": "user",
+      "content": "Tell me properly. tell me properly"
     },
     {
-      "role": "system",
-      "content": "You are an AI assistant bound to a private document database. You have exactly one tool: 'query_knowledge_graph'. YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! NEVER say you cannot view documents. YOU CAN, by using the tool."
+      "role": "assistant",
+      "content": "Transformers are neural network architectures used in natural language processing, introduced in the 2017 paper \"Attention Is All You Need\". They process sequential data using techniques like self-attention and multi-head attention, allowing efficient handling of text or speech. While there's no direct connection to farmers, technology like this can potentially aid in agricultural advancements through data analysis and similar applications."
     },
     {
       "role": "user",
-      "content": "How transformer work and what are the main part of our Transformer."
+      "content": "The answer."
     },
     {
       "role": "user",
-      "content": "how transformer work and what are the main part of our transformer"
+      "content": "Again."
     },
     {
       "role": "user",
-      "content": "Tell me whole from our document."
+      "content": "the answer again"
     },
     {
       "role": "user",
-      "content": "tell me whole from our document"
+      "content": "Transformers in machine learning."
+    },
+    {
+      "role": "user",
+      "content": "Tell me about tranq."
+    },
+    {
+      "role": "user",
+      "content": "Yeah. Tell me about transformer and how transformer works."
+    },
+    {
+      "role": "assistant",
+      "content": "A transformer is a neural network architecture introduced in the 2017 paper \"Attention Is All You Need\" by Vaswani et al. It's designed for tasks like machine translation and text summarization. The transformer uses self-attention mechanisms to handle input sequences, allowing it to consider various parts of the sequence simultaneously, unlike traditional RNNs and CNNs. It has an encoder and a decoder that work together to process and generate sequences, and it is known for its parallelization capabilities and adaptability to different tasks."
     }
   ]
 }

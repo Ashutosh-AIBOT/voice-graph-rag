@@ -84,12 +84,12 @@ class DocumentSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'user', 'name', 'file', 'file_url', 'status', 
             'entity_count', 'relationship_count', 'error_message',
-            'source', 'processing_progress', 'processing_step',
+            'source', 'summary', 'processing_progress', 'processing_step',
             'created_at', 'updated_at'
         )
         read_only_fields = (
             'id', 'user', 'status', 'entity_count', 'relationship_count', 
-            'error_message', 'processing_progress', 'processing_step',
+            'error_message', 'summary', 'processing_progress', 'processing_step',
             'created_at', 'updated_at'
         )
 
