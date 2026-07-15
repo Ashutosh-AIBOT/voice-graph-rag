@@ -7,24 +7,20 @@ import { useGraphStore } from '@/store/graph';
 import { useVoiceChatStore } from '@/store/voiceChat';
 import { useGraphData } from '@/hooks/useGraphData';
 import { useLiveKitGraphSync } from '@/hooks/useLiveKitGraphSync';
+import { useLiveKitConnection } from '@/hooks/useLiveKitConnection';
 import { VoiceControls } from '@/components/voice/VoiceControls';
 import { ChatHistorySidebar } from '@/components/voice/ChatHistorySidebar';
 import { TranscriptStrip } from '@/components/voice/TranscriptStrip';
-import { useAuthStore } from '@/store/auth';
-import api from '@/lib/axios';
 import {
   Mic2, ChevronDown, Network, FileText,
   Sparkles, Volume2, Bot, Database, Mic
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Load ForceGraph3D lazily (Three.js is heavy)
 const GraphVisualization = dynamic(
   () => import('@/components/graph/GraphVisualization').then((m) => ({ default: m.GraphVisualization })),
   { ssr: false }
 );
-
-type AgentState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
 
 import { AvatarPanel } from '@/components/voice/AvatarPanel';
 
@@ -38,13 +34,8 @@ import { GraphLegendBadges, NodeHighlightBadge, GraphEmptyOverlay } from '@/comp
 export default function VoiceRagPage() {
   useGraphData(); // Keep graph data in sync
 
-  const user = useAuthStore((s) => s.user);
   const setDim = useGraphStore((s) => s.setDim);
   const clearRagHighlights = useGraphStore((s) => s.clearRagHighlights);
-
-  const createSession = useVoiceChatStore((s) => s.createSession);
-  const setActiveSession = useVoiceChatStore((s) => s.setActiveSession);
-  const addMessage = useVoiceChatStore((s) => s.addMessage);
 
   // Switch the global graph to 3D mode when this page is active
   useEffect(() => {
@@ -53,186 +44,22 @@ export default function VoiceRagPage() {
   }, [setDim]);
 
   const selectedDocumentIds = useDocumentsStore((s) => s.selectedDocumentIds);
-  const documents = useDocumentsStore((s) => s.documents);
-  const [agentState, setAgentState] = useState<AgentState>('idle');
-  const [isMuted, setIsMuted] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [liveTranscript, setLiveTranscript] = useState('');
-  const [agentTranscript, setAgentTranscript] = useState('');
 
-  // Ref so LiveKit event callbacks always read the latest sessionId (avoids stale closure)
-  const sessionIdRef = useRef<string | null>(null);
-  useEffect(() => { sessionIdRef.current = activeSessionId; }, [activeSessionId]);
-
-  // Deduplication for transcription segments
-  const seenSegmentIds = useRef<Set<string>>(new Set());
-
-  // LiveKit token + room state
-  const livekitRef = useRef<{ room: any; token: string; url: string } | null>(null);
+  const {
+    agentState,
+    isMuted,
+    isConnected,
+    liveTranscript,
+    agentTranscript,
+    handleConnect,
+    handleDisconnect,
+    handleToggleMute,
+  } = useLiveKitConnection(activeSessionId, setActiveSessionId);
 
   // Wire the graph sync hook
   useLiveKitGraphSync(activeSessionId);
-
-  // ── Connect to LiveKit ──────────────────────────────────────────────────
-  const handleConnect = useCallback(async () => {
-    if (!user) return;
-    setAgentState('connecting');
-    try {
-      // 1. Fetch token from backend using multiple docs
-      const payloadDocs = selectedDocumentIds.length > 0 ? selectedDocumentIds : ["default"];
-      const { data } = await api.post('/livekit-token/', { doc_ids: payloadDocs });
-      const { token, url, room: roomName, doc_summary } = data as { token: string; url: string; room: string; doc_summary?: string };
-
-      // 2. Dynamically import LiveKit client (avoids SSR issues)
-      const { Room, RoomEvent, DataPacket_Kind } = await import('livekit-client');
-      const room = new Room({ adaptiveStream: true, dynacast: true });
-
-      // 3. Forward DataChannel messages to our graph sync listener
-      room.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
-        window.dispatchEvent(new CustomEvent('livekit:data', { detail: payload }));
-      });
-
-      // 4. Track transcription via track metadata / text messages
-      room.on(RoomEvent.TranscriptionReceived, (segments: any[]) => {
-        const localIdentity = room.localParticipant?.identity;
-        segments.forEach((seg: any) => {
-          if (seg.final) {
-            // Deduplicate: skip if we've already saved this segment
-            const segKey = `${seg.id ?? seg.text}-${seg.participantIdentity}`;
-            if (seenSegmentIds.current.has(segKey)) return;
-            seenSegmentIds.current.add(segKey);
-            // Keep the dedup set bounded
-            if (seenSegmentIds.current.size > 200) seenSegmentIds.current.clear();
-
-            const sessId = sessionIdRef.current;
-            const isUser = seg.participantIdentity === localIdentity;
-            if (isUser) {
-              // User turn finalised
-              if (sessId && seg.text?.trim()) addMessage(sessId, { role: 'user', content: seg.text, timestamp: Date.now() });
-              setLiveTranscript('');
-            } else {
-              // Agent turn finalised
-              if (sessId && seg.text?.trim()) addMessage(sessId, { role: 'assistant', content: seg.text, timestamp: Date.now() });
-              setAgentTranscript('');
-            }
-          } else {
-            const localIdentity2 = room.localParticipant?.identity;
-            if (seg.participantIdentity === localIdentity2) setLiveTranscript(seg.text);
-            else setAgentTranscript(seg.text);
-          }
-        });
-      });
-
-      // 5. Track agent state changes via metadata
-      room.on(RoomEvent.ParticipantMetadataChanged, (_metadata: string | undefined, participant: any) => {
-        if (participant.identity !== String(user.id)) {
-          try {
-            const meta = JSON.parse(participant.metadata ?? '{}');
-            if (meta.agent_state) setAgentState(meta.agent_state as AgentState);
-          } catch {}
-        }
-      });
-
-      // Attach remote audio tracks to our hidden audio element
-      room.on(RoomEvent.TrackSubscribed, (track: any) => {
-        if (track.kind === 'audio') {
-          const audioElement = document.getElementById('agent-audio') as HTMLAudioElement;
-          if (audioElement) {
-            track.attach(audioElement);
-          }
-        }
-      });
-
-      // Detach audio tracks cleanly
-      room.on(RoomEvent.TrackUnsubscribed, (track: any) => {
-        if (track.kind === 'audio') {
-          const audioElement = document.getElementById('agent-audio') as HTMLAudioElement;
-          if (audioElement) {
-            track.detach(audioElement);
-          }
-        }
-      });
-
-      room.on(RoomEvent.Disconnected, () => {
-        setIsConnected(false);
-        setAgentState('idle');
-        clearRagHighlights();
-      });
-
-      await room.connect(url, token);
-      livekitRef.current = { room, token, url };
-      setIsConnected(true);
-      setAgentState('listening');
-
-      // Safely request microphone access after connection state is updated
-      room.localParticipant.setMicrophoneEnabled(true).catch(err => {
-        console.warn('Microphone access denied or error:', err);
-      });
-
-      // 6. Create a new chat session
-      const selectedDocsData = documents.filter(d => selectedDocumentIds.includes(d.id));
-      const combinedNames = selectedDocsData.length > 0 ? selectedDocsData.map(d => d.name).join(', ') : 'General Chat (No Document)';
-      const combinedId = selectedDocumentIds.length > 0 ? selectedDocumentIds.join(',') : 'default';
-      const sessId = createSession(combinedId, combinedNames);
-      setActiveSessionId(sessId);
-      
-      if (doc_summary) {
-        addMessage(sessId, { 
-          role: 'assistant', 
-          content: `📚 **Document Context Loaded**\n\n${doc_summary}`, 
-          timestamp: Date.now() 
-        });
-      }
-    } catch (err) {
-      console.error('LiveKit connect error:', err);
-      setAgentState('error');
-      setTimeout(() => setAgentState('idle'), 3000);
-    }
-  }, [selectedDocumentIds, documents, user, activeSessionId, createSession, addMessage, clearRagHighlights]);
-
-  /** Persist the current session to Django backend */
-  const syncSessionToBackend = useCallback(async (sessionId: string | null) => {
-    if (!sessionId) return;
-    const session = useVoiceChatStore.getState().sessions.find(s => s.id === sessionId);
-    if (!session || session.messages.length === 0) return;
-    try {
-      await api.post('/voice-chat/sessions/', {
-        id: session.id,
-        title: session.title,
-        doc_id: session.docId,
-        doc_name: session.docName,
-        messages: session.messages,
-      });
-    } catch (err) {
-      console.warn('Failed to sync session to backend:', err);
-    }
-  }, []);
-
-  const handleDisconnect = useCallback(async () => {
-    // Sync the session to backend before disconnecting
-    await syncSessionToBackend(activeSessionId);
-
-    if (livekitRef.current?.room) {
-      await livekitRef.current.room.disconnect();
-    }
-    livekitRef.current = null;
-    setIsConnected(false);
-    setAgentState('idle');
-    setLiveTranscript('');
-    setAgentTranscript('');
-    clearRagHighlights();
-  }, [clearRagHighlights, activeSessionId, syncSessionToBackend]);
-
-  const handleToggleMute = useCallback(async () => {
-    const room = livekitRef.current?.room;
-    if (!room) return;
-    const localParticipant = room.localParticipant;
-    const muted = !isMuted;
-    await localParticipant.setMicrophoneEnabled(!muted);
-    setIsMuted(muted);
-  }, [isMuted]);
 
   const handleNewChat = useCallback(() => {
     handleDisconnect();
