@@ -46,9 +46,9 @@ class Assistant(Agent):
 class GraphRAGTools:
     """Holds the user/doc context and exposes tools for the agent."""
 
-    def __init__(self, user_id: str, doc_id: str, room):
+    def __init__(self, user_id: str, doc_ids: list, room):
         self.user_id = user_id
-        self.doc_id = doc_id
+        self.doc_ids = doc_ids
         self.room = room
 
     @llm.function_tool(description="MANDATORY TOOL: Queries the GraphRAG knowledge base to retrieve specific factual information, context, and entities from the user's document. ALWAYS call this tool when the user asks a factual question, asks about a document, transformers, papers, or any topic they uploaded. Do not answer from your own knowledge.")
@@ -67,14 +67,14 @@ class GraphRAGTools:
 
         payload = {
             "query": question,
-            "document_ids": [self.doc_id],
+            "document_ids": self.doc_ids,
             "user_id": self.user_id,
             "mode": "hybrid",
         }
 
         logger.info(
-            "🔥 LLM TRIGGERED TOOL: query_knowledge_graph! Searching backend for: '%s' | user: %s | doc: %s",
-            question, self.user_id, self.doc_id
+            "🔥 LLM TRIGGERED TOOL: query_knowledge_graph! Searching backend for: '%s' | user: %s | docs: %s",
+            question, self.user_id, self.doc_ids
         )
         try:
             async with httpx.AsyncClient() as client:
@@ -139,38 +139,46 @@ async def entrypoint(ctx: JobContext):
     # Parse metadata from token
     doc_summary = ""
     user_id = None
-    doc_id = None
+    doc_ids = []
     if participant.metadata:
         try:
             meta = json.loads(participant.metadata)
             doc_summary = meta.get("doc_summary", "")
             user_id = meta.get("user_id")
-            doc_id = meta.get("doc_id")
+            
+            # Phase 3: Supports multiple docs
+            if "doc_ids" in meta:
+                doc_ids_raw = meta.get("doc_ids")
+                if isinstance(doc_ids_raw, str):
+                    doc_ids = json.loads(doc_ids_raw)
+                else:
+                    doc_ids = doc_ids_raw
+            elif "doc_id" in meta:
+                doc_ids = [meta.get("doc_id")]
         except Exception as e:
             logger.error("Failed to parse participant metadata: %s", e)
 
     # Fallback to parsing from room name if metadata parsing failed or missing
-    if not user_id or not doc_id:
+    if not user_id or not doc_ids:
         try:
             room_name = ctx.room.name
             if "-doc-" in room_name:
                 parts = room_name.split("-doc-", 1)
                 user_id = parts[0].replace("user-", "").strip()
-                doc_id = parts[1].replace("-voice-rag", "").strip()
-            logger.info("Parsed from room name: user_id=%s, doc_id=%s", user_id, doc_id)
+                doc_ids = [parts[1].replace("-voice-rag", "").strip()]
+            logger.info("Parsed from room name: user_id=%s, doc_ids=%s", user_id, doc_ids)
         except Exception as e:
             logger.error("Error parsing room name %s: %s", ctx.room.name, e)
 
-    if not user_id or not doc_id:
+    if not user_id or not doc_ids:
         logger.warning(
-            "Could not parse user_id/doc_id from room '%s'. Using identity as fallback.",
-            ctx.room.name,
+            "Could not parse user_id/doc_ids. Using identity as fallback.",
         )
         user_id = participant.identity
-        doc_id = "default"
+        doc_ids = ["default"]
 
     # Instantiate the tools object bound to this session's user/doc context
-    tools_ctx = GraphRAGTools(user_id=user_id, doc_id=doc_id, room=ctx.room)
+    tools_ctx = GraphRAGTools(user_id=user_id, doc_ids=doc_ids, room=ctx.room)
 
     # Load past conversation history from persistent context file
     past_messages = []
@@ -185,7 +193,7 @@ async def entrypoint(ctx: JobContext):
         except Exception as e:
             logger.error("Failed to load user context: %s", e)
 
-    preemptive_enabled = (doc_id == "default" or not doc_id)
+    preemptive_enabled = ("default" in doc_ids or not doc_ids)
 
     # Build the session with STT → LLM → TTS pipeline
     session = AgentSession(

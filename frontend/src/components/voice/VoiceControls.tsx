@@ -13,7 +13,7 @@ interface VoiceControlsProps {
   onToggleMute: () => void;
   onConnect: () => void;
   onDisconnect: () => void;
-  selectedDoc: { id: string; name: string } | null;
+  selectedDocsCount: number;
 }
 
 const stateConfig: Record<AgentState, { label: string; color: string; pulse: boolean }> = {
@@ -69,7 +69,7 @@ export function VoiceControls({
   onToggleMute,
   onConnect,
   onDisconnect,
-  selectedDoc,
+  selectedDocsCount,
 }: VoiceControlsProps) {
   const cfg = stateConfig[agentState];
 
@@ -88,8 +88,8 @@ export function VoiceControls({
         <div className="min-w-0">
           <p className="text-[11px] font-semibold text-text-primary truncate">
             {isConnected
-              ? selectedDoc?.name ?? 'Connected'
-              : selectedDoc?.name ?? 'No document selected'}
+              ? `Connected to ${selectedDocsCount} doc(s)`
+              : `${selectedDocsCount} doc(s) selected`}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             {cfg.pulse && (

@@ -28,44 +28,53 @@ type AgentState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' 
 
 import { AvatarPanel } from '@/components/voice/AvatarPanel';
 
-/** Document selector dropdown */
-function DocSelector({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (id: string, name: string) => void;
-  disabled?: boolean;
-}) {
+/** Document selector chip panel */
+function MultiDocSelector() {
   const documents = useDocumentsStore((s) => s.documents).filter((d) => d.status === 'COMPLETED');
+  const selectedIds = useDocumentsStore((s) => s.selectedDocumentIds);
+  const toggleSelectDocument = useDocumentsStore((s) => s.toggleSelectDocument);
+
+  if (documents.length === 0) {
+    return <div className="text-[11px] text-text-muted italic px-2">No documents available. Upload in Documents tab.</div>;
+  }
 
   return (
-    <div className="relative">
-      <FileText className="absolute left-3 top-2.5 h-4 w-4 text-text-muted pointer-events-none" />
-      <select
-        value={value}
-        onChange={(e) => {
-          const doc = documents.find((d) => d.id === e.target.value);
-          if (doc) onChange(doc.id, doc.name);
+    <div className="flex flex-wrap gap-2">
+      <button
+        onClick={() => {
+          if (selectedIds.length === 0) {
+            useDocumentsStore.getState().selectAllDocuments();
+          } else {
+            useDocumentsStore.getState().deselectAllDocuments();
+          }
         }}
-        disabled={disabled || documents.length === 0}
         className={cn(
-          'w-full appearance-none rounded-lg border border-border/60 bg-bg-elevated',
-          'pl-9 pr-8 py-2 text-sm text-text-primary',
-          'focus:outline-none focus:ring-2 focus:ring-accent-violet/40',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          'transition-colors'
+          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors",
+          selectedIds.length === 0
+            ? "bg-bg-elevated border-border/60 text-text-muted hover:border-border hover:text-text-primary"
+            : "bg-accent-violet/10 border-accent-violet text-accent-violet"
         )}
       >
-        <option value="default">General Chat (No Document)</option>
-        {documents.map((doc) => (
-          <option key={doc.id} value={doc.id}>
-            {doc.name}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-text-muted pointer-events-none" />
+        {selectedIds.length === 0 ? "Select All" : "Clear All"}
+      </button>
+      {documents.map((doc) => {
+        const isSelected = selectedIds.includes(doc.id);
+        return (
+          <button
+            key={doc.id}
+            onClick={() => toggleSelectDocument(doc.id)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors",
+              isSelected 
+                ? "bg-accent-violet/10 border-accent-violet text-accent-violet" 
+                : "bg-bg-elevated border-border/60 text-text-muted hover:border-border hover:text-text-primary"
+            )}
+          >
+            <FileText className="h-3 w-3 shrink-0" />
+            <span className="truncate max-w-[150px]">{doc.name}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -112,7 +121,8 @@ export default function VoiceRagPage() {
     return () => setDim(2); // restore 2D on unmount
   }, [setDim]);
 
-  const [selectedDoc, setSelectedDoc] = useState<{ id: string; name: string } | null>({ id: 'default', name: 'General Chat (No Document)' });
+  const selectedDocumentIds = useDocumentsStore((s) => s.selectedDocumentIds);
+  const documents = useDocumentsStore((s) => s.documents);
   const [agentState, setAgentState] = useState<AgentState>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -136,11 +146,12 @@ export default function VoiceRagPage() {
 
   // ── Connect to LiveKit ──────────────────────────────────────────────────
   const handleConnect = useCallback(async () => {
-    if (!selectedDoc || !user) return;
+    if (!user) return;
     setAgentState('connecting');
     try {
-      // 1. Fetch token from backend
-      const { data } = await api.post('/livekit-token/', { doc_id: selectedDoc.id });
+      // 1. Fetch token from backend using multiple docs
+      const payloadDocs = selectedDocumentIds.length > 0 ? selectedDocumentIds : ["default"];
+      const { data } = await api.post('/livekit-token/', { doc_ids: payloadDocs });
       const { token, url, room: roomName, doc_summary } = data as { token: string; url: string; room: string; doc_summary?: string };
 
       // 2. Dynamically import LiveKit client (avoids SSR issues)
@@ -230,7 +241,10 @@ export default function VoiceRagPage() {
       });
 
       // 6. Create a new chat session
-      const sessId = createSession(selectedDoc.id, selectedDoc.name);
+      const selectedDocsData = documents.filter(d => selectedDocumentIds.includes(d.id));
+      const combinedNames = selectedDocsData.length > 0 ? selectedDocsData.map(d => d.name).join(', ') : 'General Chat (No Document)';
+      const combinedId = selectedDocumentIds.length > 0 ? selectedDocumentIds.join(',') : 'default';
+      const sessId = createSession(combinedId, combinedNames);
       setActiveSessionId(sessId);
       
       if (doc_summary) {
@@ -245,7 +259,7 @@ export default function VoiceRagPage() {
       setAgentState('error');
       setTimeout(() => setAgentState('idle'), 3000);
     }
-  }, [selectedDoc, user, activeSessionId, createSession, addMessage, clearRagHighlights]);
+  }, [selectedDocumentIds, documents, user, activeSessionId, createSession, addMessage, clearRagHighlights]);
 
   /** Persist the current session to Django backend */
   const syncSessionToBackend = useCallback(async (sessionId: string | null) => {
@@ -303,6 +317,25 @@ export default function VoiceRagPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-bg-base relative">
+             <div className="absolute top-0 right-0 p-5 z-20 pointer-events-auto">
+              {!isConnected && (
+                <div className="bg-bg-sidebar/95 backdrop-blur-md border border-border rounded-xl p-4 shadow-xl max-w-sm ml-auto">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Database className="h-4 w-4 text-accent-cyan" />
+                    <h3 className="text-sm font-bold text-text-primary">Select Documents</h3>
+                  </div>
+                  <MultiDocSelector />
+                  
+                  <button
+                    onClick={handleConnect}
+                    className="w-full mt-4 flex items-center justify-center gap-2 rounded-lg bg-accent-violet hover:bg-accent-violet/90 py-2.5 font-bold text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all active:scale-[0.98]"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Connect & Start RAG
+                  </button>
+                </div>
+              )}
+            </div>
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-4 bg-bg-sidebar/60 backdrop-blur-sm">
         <div className="flex items-center gap-2.5">
@@ -346,11 +379,11 @@ export default function VoiceRagPage() {
           {/* Status text */}
           <div className="text-center">
             <p className="text-xs text-text-muted leading-relaxed max-w-xs">
-              {!selectedDoc
-                ? 'Select a document above to begin a voice conversation grounded in your knowledge graph.'
+              {selectedDocumentIds.length === 0
+                ? 'Select documents above to begin a voice conversation grounded in your knowledge graph.'
                 : isConnected
-                  ? `Connected to "${selectedDoc.name}". Speak naturally — the graph will light up as I retrieve answers.`
-                  : `Ready to talk about "${selectedDoc.name}". Press Start to connect.`
+                  ? `Connected to ${selectedDocumentIds.length} document(s). Speak naturally — the graph will light up as I retrieve answers.`
+                  : `Ready to talk about ${selectedDocumentIds.length} document(s). Press Start to connect.`
               }
             </p>
           </div>
@@ -364,7 +397,7 @@ export default function VoiceRagPage() {
               onToggleMute={handleToggleMute}
               onConnect={handleConnect}
               onDisconnect={handleDisconnect}
-              selectedDoc={selectedDoc}
+              selectedDocsCount={selectedDocumentIds.length}
             />
           </div>
 

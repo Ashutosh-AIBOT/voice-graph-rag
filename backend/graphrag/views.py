@@ -1281,32 +1281,63 @@ class LiveKitTokenView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        doc_ids = request.data.get("doc_ids")
         doc_id = request.data.get("doc_id")
-        if not doc_id:
+        
+        if not doc_ids and doc_id:
+            doc_ids = [doc_id]
+            
+        if not doc_ids:
             return Response(
-                {"error": "'doc_id' is required."},
+                {"error": "'doc_ids' array or 'doc_id' string is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        doc_name = "General Chat"
-        doc_summary = ""
-        if doc_id != "default":
-            # Verify the document belongs to the requesting user
+        doc_names = []
+        doc_summaries = []
+        valid_doc_ids = []
+
+        if "default" in doc_ids or doc_ids == ["default"]:
+            doc_name = "General Chat"
+            doc_summary = ""
+            room_name = f"user-{request.user.id}-doc-default-voice-rag"
+            doc_ids_json = '["default"]'
+        else:
+            # Verify the documents belong to the requesting user
             try:
                 from django.core.exceptions import ValidationError
-                doc = Document.objects.get(id=doc_id, user=request.user)
-                doc_name = doc.name
-                # Use getattr for now until Phase 2 adds the summary field to the model
-                doc_summary = getattr(doc, 'summary', "")
-            except (Document.DoesNotExist, ValueError, ValidationError):
-                return Response(
-                    {"error": "Document not found or access denied."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                docs = Document.objects.filter(id__in=doc_ids, user=request.user)
+                if docs.count() != len(set(doc_ids)):
+                    return Response(
+                        {"error": "One or more documents not found or access denied."},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+                
+                for doc in docs:
+                    if doc.status != Document.Status.COMPLETED:
+                        return Response(
+                            {"error": f"Document '{doc.name}' has not finished processing yet. Please wait until status is COMPLETED."},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    doc_names.append(doc.name)
+                    doc_summaries.append(getattr(doc, 'summary', ""))
+                    valid_doc_ids.append(str(doc.id))
 
-            if doc.status != Document.Status.COMPLETED:
+                doc_name = ", ".join(doc_names)
+                # Format summaries nicely
+                if len(doc_summaries) == 1:
+                    doc_summary = doc_summaries[0]
+                else:
+                    doc_summary = "\n\n".join([f"--- {name} ---\n{summary}" for name, summary in zip(doc_names, doc_summaries) if summary])
+                
+                # Generate a deterministic room name based on sorted IDs
+                import hashlib
+                hash_id = hashlib.md5(",".join(sorted(valid_doc_ids)).encode()).hexdigest()[:12]
+                room_name = f"user-{request.user.id}-multi-{hash_id}-voice-rag"
+                doc_ids_json = json.dumps(valid_doc_ids)
+            except (ValueError, ValidationError):
                 return Response(
-                    {"error": "Document has not finished processing yet. Please wait until status is COMPLETED."},
+                    {"error": "Invalid document IDs provided."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -1324,8 +1355,6 @@ class LiveKitTokenView(APIView):
         try:
             from livekit import api as lkapi
 
-            room_name = f"user-{request.user.id}-doc-{doc_id}-voice-rag"
-
             token = (
                 lkapi.AccessToken(livekit_api_key, livekit_api_secret)
                 .with_grants(lkapi.VideoGrants(
@@ -1338,7 +1367,7 @@ class LiveKitTokenView(APIView):
                 .with_name(request.user.username)
                 .with_metadata(json.dumps({
                     "user_id": str(request.user.id),
-                    "doc_id": str(doc_id),
+                    "doc_ids": doc_ids_json,
                     "doc_name": doc_name,
                     "doc_summary": doc_summary,
                 }))
