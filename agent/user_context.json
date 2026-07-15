@@ -1,3 +1,28 @@
 {
-  "b85795fc-587a-4b32-a1fa-5d0f5ebba984": []
+  "b85795fc-587a-4b32-a1fa-5d0f5ebba984": [
+    {
+      "role": "system",
+      "content": "You are an AI assistant bound to a private document database. You have exactly one tool: 'query_knowledge_graph'. YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! NEVER say you cannot view documents. YOU CAN, by using the tool."
+    },
+    {
+      "role": "system",
+      "content": "You are an AI assistant bound to a private document database. You have exactly one tool: 'query_knowledge_graph'. YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! NEVER say you cannot view documents. YOU CAN, by using the tool."
+    },
+    {
+      "role": "user",
+      "content": "How transformer work and what are the main part of our Transformer."
+    },
+    {
+      "role": "user",
+      "content": "how transformer work and what are the main part of our transformer"
+    },
+    {
+      "role": "user",
+      "content": "Tell me whole from our document."
+    },
+    {
+      "role": "user",
+      "content": "tell me whole from our document"
+    }
+  ]
 }

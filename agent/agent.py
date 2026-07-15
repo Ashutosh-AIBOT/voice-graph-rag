@@ -42,12 +42,12 @@ class GraphRAGTools:
         self.doc_id = doc_id
         self.room = room
 
-    @llm.function_tool
+    @llm.function_tool(description="MANDATORY TOOL: Queries the GraphRAG knowledge base to retrieve specific factual information, context, and entities from the user's document. ALWAYS call this tool when the user asks a factual question, asks about a document, transformers, papers, or any topic they uploaded. Do not answer from your own knowledge.")
     async def query_knowledge_graph(self, question: str) -> str:
         """Queries the GraphRAG knowledge base for information about the document.
 
         Args:
-            question: The user's query or question about the document.
+            question: The exact question to search in the database.
         """
         api_url = os.environ.get("GRAPHRAG_API_URL", "http://localhost:8000")
         agent_secret = os.environ.get("VOICE_AGENT_SECRET")
@@ -64,7 +64,7 @@ class GraphRAGTools:
         }
 
         logger.info(
-            "RAG tool querying backend: %s | user: %s | doc: %s",
+            "🔥 LLM TRIGGERED TOOL: query_knowledge_graph! Searching backend for: '%s' | user: %s | doc: %s",
             question, self.user_id, self.doc_id
         )
         try:
@@ -83,7 +83,7 @@ class GraphRAGTools:
                     cited_entities = data.get("cited_entities", [])
 
                     logger.info(
-                        "RAG query returned %d cited entities.", len(cited_entities)
+                        "✅ BACKEND RETURNED HYBRID CHUNKS! Sending %d characters to LLM memory. 🌐 Extracted %d graph nodes.", len(answer), len(cited_entities)
                     )
 
                     # Publish cited entities to the frontend via LiveKit DataChannel
@@ -194,20 +194,20 @@ async def entrypoint(ctx: JobContext):
         tools=[tools_ctx.query_knowledge_graph],
     )
 
-    # Pre-populate history with a strong system prompt first
+    # Pre-populate history with an EXTREMELY strong system prompt first
     system_prompt = (
-        "You are a helpful voice AI assistant for a document knowledge base. "
-        "You have a tool called 'query_knowledge_graph'. "
-        "YOU MUST USE THIS TOOL whenever the user asks about the document, requests a summary, "
-        "or asks any factual questions. DO NOT say you cannot view documents—you CAN by using the tool! "
-        "Be extremely concise, direct, and conversational — you are speaking, not writing. "
-        "Keep responses under 2-3 sentences where possible. "
-        "When you retrieve facts, briefly mention the key concepts you found."
+        "You are an AI assistant bound to a private document database. "
+        "You have exactly one tool: 'query_knowledge_graph'. "
+        "YOU MUST USE THIS TOOL to answer every single question about facts, concepts, or documents. "
+        "For example, if the user asks 'how does a transformer work?', DO NOT explain it from your memory. "
+        "INSTEAD, call the 'query_knowledge_graph' tool to fetch the answer from the document! "
+        "NEVER say you cannot view documents. YOU CAN, by using the tool."
     )
     session.history.add_message(role="system", content=system_prompt)
 
-    # Pre-populate history with past context
-    for msg in past_messages:
+    # Pre-populate history with past context (Limit to last 6 messages to save context window)
+    for msg in past_messages[-6:]:
+        logger.info("📚 INJECTING PAST HISTORY [%s]: %s...", msg["role"], msg["content"][:60])
         session.history.add_message(role=msg["role"], content=msg["content"])
 
     # Observability callbacks
@@ -278,7 +278,7 @@ async def entrypoint(ctx: JobContext):
 
 async def request_fnc(req: agents.JobRequest) -> None:
     logger.info("Accepting job for room %s", req.room.name)
-    await req.accept(entrypoint)
+    await req.accept()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
