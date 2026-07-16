@@ -133,10 +133,10 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
       camera.fov = 28;
       camera.position.set(0.0, 1.4, 2.0);
     } else {
-      camera.fov = 22;
+      camera.fov = 8.5;
       camera.position.set(0.0, 1.45, 1.6);
     }
-    camera.lookAt(new THREE.Vector3(0.0, 1.35, 0.0));
+    camera.lookAt(new THREE.Vector3(0.0, 1.36, 0.0));
     cameraRef.current = camera;
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
@@ -162,10 +162,10 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         cameraRef.current.fov = 28;
         cameraRef.current.position.set(0.0, 1.4, 2.0);
       } else {
-        cameraRef.current.fov = 22;
+        cameraRef.current.fov = 8.5;
         cameraRef.current.position.set(0.0, 1.45, 1.6);
       }
-      cameraRef.current.lookAt(new THREE.Vector3(0.0, 1.35, 0.0));
+      cameraRef.current.lookAt(new THREE.Vector3(0.0, 1.36, 0.0));
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
