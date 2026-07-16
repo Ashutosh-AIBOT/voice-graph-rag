@@ -117,29 +117,29 @@ export function QueryHistory({ onSelect }: QueryHistoryProps) {
                   onSelect(item.query_text, item);
                   setOpen(false);
                 }}
-                className="flex w-full items-start gap-2 px-4 py-2.5 text-left hover:bg-bg-surface transition-colors group"
+                className="flex w-full items-start gap-2 px-4 py-2.5 text-left hover:bg-bg-elevated transition-colors group"
               >
-                <RotateCcw className="mt-0.5 h-3 w-3 shrink-0 text-text-muted group-hover:text-accent-violet transition-colors" />
+                <RotateCcw className="mt-0.5 h-3 w-3 shrink-0 text-text-muted group-hover:text-accent-primary transition-colors" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium text-text-primary">
                     {item.query_text}
                   </p>
                   {(item as any).answer_preview && (
-                    <p className="mt-0.5 truncate text-[10px] text-text-muted">
+                    <p className="mt-0.5 truncate text-[11px] text-text-muted">
                       {(item as any).answer_preview}
                     </p>
                   )}
-                  <div className="mt-0.5 flex items-center gap-2">
+                  <div className="mt-1 flex items-center gap-2">
                     <span
                       className={cn(
-                        'rounded px-1 py-px text-[9px] font-semibold uppercase',
+                        'rounded px-1.5 py-0.5 text-[10px] font-medium uppercase',
                         item.retrieval_mode === 'HYBRID'
-                          ? 'bg-accent-violet/20 text-accent-violet'
+                          ? 'bg-accent-primary/10 text-accent-primary'
                           : item.retrieval_mode === 'GRAPH'
-                          ? 'bg-accent-cyan/20 text-accent-cyan'
+                          ? 'bg-accent-cyan/10 text-accent-cyan'
                           : item.retrieval_mode === 'MULTIHOP'
-                          ? 'bg-accent-indigo/25 text-accent-indigo border border-accent-indigo/20'
-                          : 'bg-emerald-500/20 text-emerald-400'
+                          ? 'bg-accent-secondary/10 text-accent-secondary'
+                          : 'bg-success/10 text-success'
                       )}
                     >
                       {item.retrieval_mode}
@@ -148,11 +148,11 @@ export function QueryHistory({ onSelect }: QueryHistoryProps) {
                       <Clock className="h-2.5 w-2.5" />
                       {formatTime(item.created_at)}
                     </span>
-                    <span className="text-[10px] text-text-muted">
-                      {item.response_time > 0
-                        ? `${(item.response_time * 1000).toFixed(0)}ms`
-                        : ''}
-                    </span>
+                    {item.response_time > 0 && (
+                      <span className="text-[10px] text-text-muted">
+                        {(item.response_time * 1000).toFixed(0)}ms
+                      </span>
+                    )}
                   </div>
                 </div>
               </button>

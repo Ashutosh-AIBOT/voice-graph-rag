@@ -23,8 +23,8 @@ interface ComparisonData {
 }
 
 const COL_META = [
-  { key: 'graph', label: 'Graph Only', accent: 'text-accent-violet', bar: 'bg-accent-violet' },
-  { key: 'vector', label: 'Vector Only', accent: 'text-accent-indigo', bar: 'bg-accent-indigo' },
+  { key: 'graph', label: 'Graph Only', accent: 'text-accent-primary', bar: 'bg-accent-primary' },
+  { key: 'vector', label: 'Vector Only', accent: 'text-accent-secondary', bar: 'bg-accent-secondary' },
   { key: 'hybrid', label: 'Hybrid', accent: 'text-accent-cyan', bar: 'bg-accent-cyan' },
 ] as const;
 
@@ -107,7 +107,7 @@ export function ComparisonView() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-4 scrollbar-thin">
-      <div className="rounded-md border border-border bg-bg-surface p-3">
+      <div className="rounded-xl border border-border bg-bg-surface p-4">
         <QueryPanel
           value={query}
           onChange={setQuery}
@@ -125,7 +125,7 @@ export function ComparisonView() {
       )}
 
       {error && (
-        <div className="flex items-start gap-2 rounded-md border border-error/30 bg-error/5 p-3 text-sm text-error">
+        <div className="flex items-start gap-2 rounded-xl border border-error/30 bg-error/5 p-4 text-sm text-error">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>

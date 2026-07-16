@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface HistoryItem {
   id: string;
@@ -20,6 +20,21 @@ interface HistoryState {
   resetLoaded: () => void;
 }
 
+const clientStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
+
 export const useHistoryStore = create<HistoryState>()(
   persist(
     (set) => ({
@@ -33,6 +48,7 @@ export const useHistoryStore = create<HistoryState>()(
     }),
     {
       name: 'graphrag-query-history',
+      storage: createJSONStorage(() => clientStorage),
     }
   )
 );

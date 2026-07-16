@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -34,21 +34,22 @@ export function QueryPanel({
 }: QueryPanelProps) {
   return (
     <div className="space-y-3">
+      {/* Mode selector + document filter */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
             Mode
           </span>
-          <div className="inline-flex rounded-md border border-border p-0.5">
+          <div className="inline-flex rounded-lg bg-bg-elevated p-0.5">
             {MODES.map((m) => (
               <button
                 key={m.value}
                 onClick={() => onModeChange(m.value)}
                 className={cn(
-                  'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                  'rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-150',
                   mode === m.value
-                    ? 'bg-accent-violet text-white'
-                    : 'text-text-secondary hover:text-text-primary'
+                    ? 'bg-accent-primary text-white shadow-sm'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface'
                 )}
               >
                 {m.label}
@@ -56,21 +57,28 @@ export function QueryPanel({
             ))}
           </div>
         </div>
-
         <DocumentFilterDropdown />
       </div>
 
+      {/* Search input */}
       <div className="flex gap-2">
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !loading && onSubmit()}
-          placeholder="Ask anything about your documents..."
-          className="h-11"
-        />
-        <Button onClick={onSubmit} disabled={loading || !value.trim()} className="h-11 px-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <Input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !loading && onSubmit()}
+            placeholder="Ask anything about your documents..."
+            className="h-11 pl-10 bg-bg-surface"
+          />
+        </div>
+        <Button
+          onClick={onSubmit}
+          disabled={loading || !value.trim()}
+          size="lg"
+        >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          <span className="hidden sm:inline">Submit</span>
+          <span className="hidden sm:inline">Ask</span>
         </Button>
       </div>
     </div>

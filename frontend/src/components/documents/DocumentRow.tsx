@@ -36,7 +36,7 @@ export function DocumentRow({
     <div
       className={cn(
         'rounded-md border border-border bg-bg-surface p-3 transition-colors',
-        doc.status === 'COMPLETED' && 'hover:border-accent-violet/30 cursor-pointer'
+        doc.status === 'COMPLETED' && 'hover:border-accent-primary/30 cursor-pointer'
       )}
       onClick={() => doc.status === 'COMPLETED' && onViewDetails?.(doc)}
     >
@@ -50,7 +50,7 @@ export function DocumentRow({
                 e.stopPropagation();
                 onToggleSelect?.(doc.id);
               }}
-              className="h-4 w-4 rounded border-border bg-bg-surface text-accent-violet focus:ring-accent-violet cursor-pointer"
+              className="h-4 w-4 rounded border-border bg-bg-surface text-accent-primary focus:ring-accent-primary cursor-pointer"
             />
           ) : (
             <div className="w-4 h-4 shrink-0" /> // Spacer to preserve alignment
@@ -84,7 +84,7 @@ export function DocumentRow({
             <span>{formatDate(doc.uploadedAt)}</span>
           </div>
           {doc.summary && (
-            <div className="mt-1 p-2 rounded bg-bg-elevated/50 border border-border/30 text-[11px] leading-relaxed italic border-l-2 border-l-accent-violet">
+            <div className="mt-1 p-2 rounded bg-bg-elevated/50 border border-border/30 text-[11px] leading-relaxed italic border-l-2 border-l-accent-primary">
               {doc.summary}
             </div>
           )}

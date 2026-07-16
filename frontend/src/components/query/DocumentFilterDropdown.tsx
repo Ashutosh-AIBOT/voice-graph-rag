@@ -43,7 +43,7 @@ export function DocumentFilterDropdown() {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-accent-violet/50 hover:bg-bg-elevated transition-all"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-accent-primary/50 hover:bg-bg-elevated transition-all"
       >
         <Filter className="h-3.5 w-3.5 text-text-muted" />
         <span>{label}</span>
@@ -61,7 +61,7 @@ export function DocumentFilterDropdown() {
               <button
                 type="button"
                 onClick={selectAll}
-                className="text-[10px] font-semibold text-accent-violet hover:underline"
+                className="text-[10px] font-semibold text-accent-primary hover:underline"
               >
                 Select All
               </button>
@@ -84,7 +84,7 @@ export function DocumentFilterDropdown() {
               placeholder="Search documents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/60"
+              className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-primary text-text-primary placeholder:text-text-muted/60"
             />
           </div>
 
@@ -104,7 +104,7 @@ export function DocumentFilterDropdown() {
                     className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-bg-elevated cursor-pointer transition-colors"
                   >
                     {checked ? (
-                      <CheckSquare className="h-4 w-4 shrink-0 text-accent-violet" />
+                      <CheckSquare className="h-4 w-4 shrink-0 text-accent-primary" />
                     ) : (
                       <Square className="h-4 w-4 shrink-0 text-text-muted" />
                     )}

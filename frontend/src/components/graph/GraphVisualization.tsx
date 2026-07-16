@@ -26,7 +26,23 @@ interface FGLink {
   confidence?: number;
 }
 
-export function GraphVisualization({ height = '100%', hideControls = false }: { height?: string | number; hideControls?: boolean }) {
+// Canvas can't use Tailwind's `.dark` class, so read it directly — cheap enough
+// to call every frame and always reflects the live theme (no stale cache).
+function isDarkTheme(): boolean {
+  if (typeof document === 'undefined') return true;
+  return document.documentElement.classList.contains('dark');
+}
+
+export function GraphVisualization({
+  height = '100%',
+  hideControls = false,
+  hideLegend = hideControls,
+}: {
+  height?: string | number;
+  hideControls?: boolean;
+  /** Suppress only the built-in entity-type legend, independent of hideControls. */
+  hideLegend?: boolean;
+}) {
   const data = useGraphStore((s) => s.data);
   const highlighted = useGraphStore((s) => s.highlightedEntities);
   const paths = useGraphStore((s) => s.highlightedPaths);
@@ -160,6 +176,12 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
     const isRagHighlighted = ragHighlightedIds.includes(n.id); // teal glow — already cited
 
     const alpha = dimmed ? 0.2 : 1;
+    const dark = isDarkTheme();
+    // Text/border colors depend on canvas background, which flips with the theme.
+    const emphasisColor = dark ? '#ffffff' : '#0a0c14';
+    const labelColor = dark ? 'rgba(220,220,240,0.9)' : 'rgba(30,32,45,0.9)';
+    const labelBgColor = dark ? 'rgba(10, 12, 20, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+    const nodeBorderColor = dark ? 'rgba(255,255,255,0.25)' : 'rgba(10,12,20,0.2)';
 
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -199,7 +221,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
 
     // ── Standard highlight / search / hover ─────────────────────────────────
     if (!isRagActive && !isRagHighlighted && (isHighlighted || isSearch || isHovered)) {
-      const glowColor = isSearch ? '#ffffff' : isHighlighted ? 'hsl(188, 94%, 52%)' : color;
+      const glowColor = isSearch ? emphasisColor : isHighlighted ? 'hsl(188, 94%, 52%)' : color;
       ctx.shadowBlur = 20;
       ctx.shadowColor = glowColor;
       ctx.beginPath();
@@ -223,7 +245,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
     // Subtle border
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.strokeStyle = isRagActive ? 'rgba(255,215,0,0.6)' : 'rgba(255,255,255,0.25)';
+    ctx.strokeStyle = isRagActive ? 'rgba(255,215,0,0.6)' : nodeBorderColor;
     ctx.lineWidth = isRagActive ? 2 : 1;
     ctx.stroke();
 
@@ -239,10 +261,10 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
 
       const textWidth = ctx.measureText(n.name).width;
       const bPad = 2 / globalScale;
-      ctx.fillStyle = 'rgba(10, 12, 20, 0.85)';
+      ctx.fillStyle = labelBgColor;
       ctx.fillRect(x - textWidth / 2 - bPad, y + r + 1 / globalScale, textWidth + bPad * 2, fontSize + bPad * 2);
 
-      ctx.fillStyle = isRagActive ? '#FFD700' : (isHighlighted || isHovered ? '#ffffff' : 'rgba(220,220,240,0.9)');
+      ctx.fillStyle = isRagActive ? '#FFD700' : (isHighlighted || isHovered ? emphasisColor : labelColor);
       ctx.fillText(n.name, x, y + r + fontSize / 2 + 3 / globalScale);
     }
 
@@ -278,7 +300,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
           const nodeId = (n as any).id;
           if (nodeId === activeAnimatingNode) return '#FFD700'; // gold pulse
           if (ragHighlightedIds.includes(nodeId)) return 'hsl(188, 94%, 52%)'; // teal cited
-          if (searchHit && nodeId === searchHit) return '#ffffff';
+          if (searchHit && nodeId === searchHit) return isDarkTheme() ? '#ffffff' : '#0a0c14';
           return entityColor(n.type);
         }}
         nodeOpacity={(n: any) => (isDimmed(n as FGNode) ? 0.18 : 1)}
@@ -351,7 +373,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
         }}
       />
       {!hideControls && <GraphControls />}
-      {!hideControls && <GraphLegend />}
+      {!hideLegend && <GraphLegend />}
       {!hideControls && <GraphSearch />}
       {hoverNode && !contextMenu && (
         <div className="pointer-events-none absolute left-3 top-3 z-20 max-w-xs rounded-lg border border-border bg-bg-elevated/95 p-3 text-xs shadow-xl backdrop-blur">

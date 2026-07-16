@@ -79,7 +79,6 @@ export default function RegisterPage() {
         password: trimmed.password,
         confirm_password: trimmed.confirm,
       });
-      // Auto-login after registration
       const { data } = await api.post('/auth/login/', {
         username: form.username,
         password: form.password,
@@ -97,7 +96,7 @@ export default function RegisterPage() {
     }
   }
 
-    const passwordsMatch = form.password && form.confirm && form.password === form.confirm;
+  const passwordsMatch = form.password && form.confirm && form.password === form.confirm;
   const passwordsMismatch = form.confirm && form.password !== form.confirm;
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -105,84 +104,137 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen bg-bg-base">
+      {/* Left: Form */}
       <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2">
         <div className="mx-auto w-full max-w-sm">
-          <div className="mb-8 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent-violet text-white">
+          <div className="mb-10 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white shadow-sm">
                 <Network className="h-4 w-4" />
               </div>
-              <span className="text-lg font-semibold">GraphRAG</span>
+              <span className="text-lg font-semibold tracking-tight">GraphRAG</span>
             </Link>
             <ThemeToggle />
           </div>
 
-          <h1 className="text-2xl font-bold">Create your account</h1>
-          <p className="mt-1 text-sm text-text-secondary">Start building knowledge graphs</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+          <p className="mt-2 text-sm text-text-secondary">Start building knowledge graphs</p>
 
-          <form onSubmit={submit} className="mt-6 space-y-4">
+          <form onSubmit={submit} className="mt-8 space-y-5">
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Username</label>
+              <label className="mb-2 block text-sm font-medium">Username</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                <Input value={form.username} onChange={set('username')} required placeholder="johnsmith" className="pl-9" />
+                <Input value={form.username} onChange={set('username')} required placeholder="johnsmith" className="pl-10" />
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Email</label>
+              <label className="mb-2 block text-sm font-medium">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                <Input type="email" value={form.email} onChange={set('email')} required placeholder="you@example.com" className="pl-9" />
+                <Input type="email" value={form.email} onChange={set('email')} required placeholder="you@example.com" className="pl-10" />
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Password</label>
+              <label className="mb-2 block text-sm font-medium">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                <Input type="password" value={form.password} onChange={set('password')} required placeholder="••••••••" className="pl-9" />
+                <Input type="password" value={form.password} onChange={set('password')} required placeholder="••••••••" className="pl-10" />
               </div>
               {form.password && (
-                <div className="mt-1.5 space-y-1">
+                <div className="mt-2 space-y-1.5">
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-elevated">
-                    <div className={`h-full rounded-full transition-all ${pwStrength.color}`} style={{ width: pwStrength.width }} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${pwStrength.color}`} style={{ width: pwStrength.width }} />
                   </div>
-                  <p className="text-xs text-text-muted">Strength: {pwStrength.label}</p>
+                  <p className="text-[11px] font-medium text-text-muted">Strength: {pwStrength.label}</p>
                 </div>
               )}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Confirm Password</label>
+              <label className="mb-2 block text-sm font-medium">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                <Input type="password" value={form.confirm} onChange={set('confirm')} required placeholder="••••••••" className="pl-9" />
+                <Input type="password" value={form.confirm} onChange={set('confirm')} required placeholder="••••••••" className="pl-10" />
               </div>
-              {passwordsMatch && <p className="mt-1 text-xs text-success">✓ Passwords match</p>}
-              {passwordsMismatch && <p className="mt-1 text-xs text-error">✗ Passwords do not match</p>}
+              {passwordsMatch && <p className="mt-1.5 text-xs font-medium text-success">Passwords match</p>}
+              {passwordsMismatch && <p className="mt-1.5 text-xs font-medium text-error">Passwords do not match</p>}
             </div>
 
-            {error && <p className="text-sm text-error">{error}</p>}
+            {error && (
+              <div className="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+                {error}
+              </div>
+            )}
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full"
+              size="lg"
+            >
               {loading ? 'Creating account...' : 'Create Account'}
               {!loading && <ArrowRight className="h-4 w-4" />}
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-text-secondary">
+          <p className="mt-8 text-center text-sm text-text-secondary">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-accent-violet hover:underline">
+            <Link href="/login" className="font-medium text-accent-primary transition-colors hover:text-accent-primary/80">
               Login
             </Link>
           </p>
         </div>
       </div>
 
-      <div className="relative hidden items-center justify-center overflow-hidden bg-gradient-to-br from-accent-violet/20 via-accent-indigo/20 to-accent-cyan/20 lg:flex lg:w-1/2">
-        <div className="px-10 text-center">
-          <h2 className="text-3xl font-bold text-text-primary">From documents to knowledge</h2>
-          <p className="mt-3 text-text-secondary">
+      {/* Right: Decorative panel */}
+      <div className="relative hidden items-center justify-center overflow-hidden lg:flex lg:w-1/2 gradient-mesh">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/10 via-accent-cyan/10 to-accent-secondary/10" />
+
+        <div className="absolute inset-0">
+          {[
+            { x: '25%', y: '25%', size: 10, color: 'accent-primary', delay: 0.5 },
+            { x: '65%', y: '15%', size: 14, color: 'accent-cyan', delay: 1.5 },
+            { x: '75%', y: '55%', size: 8, color: 'accent-secondary', delay: 2.5 },
+            { x: '35%', y: '65%', size: 12, color: 'accent-primary', delay: 0 },
+            { x: '55%', y: '40%', size: 6, color: 'accent-cyan', delay: 3 },
+          ].map((node, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full animate-float"
+              style={{
+                left: node.x,
+                top: node.y,
+                width: node.size,
+                height: node.size,
+                backgroundColor: `hsl(var(--${node.color}))`,
+                opacity: 0.25,
+                animationDelay: `${node.delay}s`,
+                animationDuration: `${5 + i}s`,
+              }}
+            />
+          ))}
+          <svg className="absolute inset-0 h-full w-full opacity-10">
+            <line x1="25%" y1="25%" x2="65%" y2="15%" stroke="hsl(188, 94%, 42%)" strokeWidth="1" />
+            <line x1="65%" y1="15%" x2="75%" y2="55%" stroke="hsl(45, 93%, 58%)" strokeWidth="1" />
+            <line x1="75%" y1="55%" x2="35%" y2="65%" stroke="hsl(152, 60%, 48%)" strokeWidth="1" />
+            <line x1="35%" y1="65%" x2="25%" y2="25%" stroke="hsl(188, 94%, 42%)" strokeWidth="1" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 px-10 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-text-primary">
+            From documents to knowledge
+          </h2>
+          <p className="mt-4 max-w-md text-sm text-text-secondary leading-relaxed">
             Sign up to extract entities, build graphs, and ask questions across your entire corpus.
           </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            {['9 Entity Types', '10 Relationship Types', 'Multi-Hop Reasoning'].map((feature) => (
+              <span key={feature} className="rounded-md bg-bg-surface border border-border px-3 py-1.5 text-xs font-medium text-text-secondary">
+                {feature}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>

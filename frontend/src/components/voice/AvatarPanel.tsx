@@ -43,7 +43,7 @@ export function AvatarPanel({ isConnected, agentState }: AvatarPanelProps) {
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex items-center gap-2 bg-bg-surface/80 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-2 hover:bg-bg-elevated transition-colors shadow-lg"
         >
-          <div className="h-2 w-2 rounded-full bg-accent-violet animate-pulse" />
+          <div className="h-2 w-2 rounded-full bg-accent-primary animate-pulse" />
           <span className="text-xs font-bold text-text-primary">{currentAvatarLabel}</span>
           <svg className={cn("h-4 w-4 text-text-muted transition-transform duration-200", isDropdownOpen && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -62,7 +62,7 @@ export function AvatarPanel({ isConnected, agentState }: AvatarPanelProps) {
                 className={cn(
                   "relative overflow-hidden px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-95 text-left",
                   currentVrmUrl === model.id 
-                    ? "bg-accent-violet text-white shadow-md shadow-accent-violet/20" 
+                    ? "bg-accent-primary text-white shadow-md shadow-accent-primary/20" 
                     : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 )}
               >

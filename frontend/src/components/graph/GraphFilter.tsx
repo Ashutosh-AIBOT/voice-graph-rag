@@ -37,7 +37,7 @@ export function GraphFilter() {
               'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
               hidden
                 ? 'border-border bg-transparent text-text-muted line-through'
-                : 'border-accent-violet/40 bg-accent-violet/10 text-accent-violet'
+                : 'border-accent-primary/40 bg-accent-primary/10 text-accent-primary'
             )}
           >
             {rel.replace(/_/g, ' ')} ({relCounts[rel] || 0})

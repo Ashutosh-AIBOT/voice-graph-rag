@@ -54,7 +54,7 @@ function NodeBadge({ name, isStart, isEnd }: { name: string; isStart?: boolean; 
       </div>
       <span className="text-sm font-bold leading-tight text-white">{name}</span>
       {isStart && <span className="text-[9px] uppercase tracking-widest text-accent-cyan/85 font-mono">Start Node</span>}
-      {isEnd && <span className="text-[9px] uppercase tracking-widest text-accent-indigo/85 font-mono">End Node</span>}
+      {isEnd && <span className="text-[9px] uppercase tracking-widest text-accent-secondary/85 font-mono">End Node</span>}
     </div>
   );
 }
@@ -63,7 +63,7 @@ function RelArrow({ rel, doc }: { rel: string; doc?: string }) {
   return (
     <div className="flex flex-col items-center gap-1 px-2 min-w-[90px] relative">
       {/* Connector Line */}
-      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-accent-cyan/35 to-accent-indigo/35 -translate-y-2 z-0" />
+      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-accent-cyan/35 to-accent-secondary/35 -translate-y-2 z-0" />
       
       {/* Relation Type Badge */}
       <span className="relative z-10 rounded-full bg-accent-cyan/15 border border-accent-cyan/30 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-cyan whitespace-nowrap shadow-sm backdrop-blur-md">
@@ -100,7 +100,7 @@ function StepRow({ hop, index }: { hop: Hop; index: number }) {
               {hop.rel.replace(/_/g, ' ')}
             </span>
             <ChevronRight className="h-4 w-4 text-text-muted/60" />
-            <span className="text-sm font-bold text-accent-indigo hover:text-accent-indigo/80 transition-colors cursor-pointer">
+            <span className="text-sm font-bold text-accent-secondary hover:text-accent-secondary/80 transition-colors cursor-pointer">
               {hop.to}
             </span>
           </div>
@@ -189,7 +189,7 @@ export function PathView({
             {currentPath.length} hop{currentPath.length !== 1 ? 's' : ''}
           </span>
           {alternativePaths.length > 0 && (
-            <span className="rounded-full bg-accent-indigo/20 px-2 py-0.5 text-xs font-bold text-accent-indigo">
+            <span className="rounded-full bg-accent-secondary/20 px-2 py-0.5 text-xs font-bold text-accent-secondary">
               +{alternativePaths.length} alternative path{alternativePaths.length > 1 ? 's' : ''}
             </span>
           )}
@@ -198,7 +198,7 @@ export function PathView({
           onClick={onCopy}
           className="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-all border border-border/50 hover:border-accent-cyan/40"
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? 'Copied' : 'Copy Path'}
         </button>
       </div>
@@ -218,7 +218,7 @@ export function PathView({
                     isActive
                       ? i === 0
                         ? 'bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan shadow-sm font-extrabold'
-                        : 'bg-accent-indigo/15 border border-accent-indigo/30 text-accent-indigo shadow-sm font-extrabold'
+                        : 'bg-accent-secondary/15 border border-accent-secondary/30 text-accent-secondary shadow-sm font-extrabold'
                       : 'bg-transparent border border-transparent text-text-muted hover:text-text-primary hover:bg-white/5'
                   }`}
                 >
@@ -236,8 +236,8 @@ export function PathView({
             <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
               Active Graph Pathway: {activeTab === 0 ? 'Primary Route' : `Alternative Route ${activeTab}`}
             </span>
-            <span className="flex items-center gap-1 rounded bg-green-500/10 border border-green-500/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-green-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="flex items-center gap-1 rounded bg-success/10 border border-success/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
               Highlighted on Graph
             </span>
           </div>
@@ -298,28 +298,28 @@ export function PathView({
 
       {/* ── AI CONCLUSION CARD ── */}
       {currentExplanation ? (
-        <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 shadow-sm backdrop-blur-md relative overflow-hidden">
-          <div className="absolute top-0 right-0 h-24 w-24 bg-green-500/10 rounded-full blur-2xl -mr-8 -mt-8" />
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-green-400">
-            <Zap className="h-4 w-4 animate-pulse text-green-400" />
+        <div className="rounded-xl border border-success/30 bg-success/10 p-4 shadow-sm backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-24 w-24 bg-success/10 rounded-full blur-2xl -mr-8 -mt-8" />
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-success">
+            <Zap className="h-4 w-4 animate-pulse text-success" />
             AI Reasoning Explanation ({activeTab === 0 ? 'Primary Path' : `Alt Path ${activeTab}`})
           </p>
           <p className="text-sm text-text-secondary leading-relaxed bg-black/10 p-3 rounded-lg border border-white/5 font-medium">
             {currentExplanation}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-green-400/80 bg-green-500/5 px-2.5 py-1.5 rounded-lg border border-green-500/20">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-success/80 bg-success/5 px-2.5 py-1.5 rounded-lg border border-success/20">
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-green-400" />
+              <Check className="h-3.5 w-3.5 text-success" />
               Pathway loaded & visualized on graph
             </span>
-            <span className="font-mono text-[9px] uppercase tracking-wider bg-green-500/15 px-1.5 py-0.5 rounded border border-green-500/25">
+            <span className="font-mono text-[9px] uppercase tracking-wider bg-success/15 px-1.5 py-0.5 rounded border border-success/25">
               Active
             </span>
           </div>
         </div>
       ) : (
         <div className="rounded-xl border border-border/80 bg-bg-surface/50 p-6 text-center space-y-4 shadow-sm backdrop-blur-md animate-fade-in">
-          <Zap className="h-8 w-8 text-accent-indigo mx-auto animate-pulse" />
+          <Zap className="h-8 w-8 text-accent-secondary mx-auto animate-pulse" />
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-white">Generate Path-Specific Explanation</h4>
             <p className="text-xs text-text-muted max-w-sm mx-auto leading-relaxed">
@@ -329,7 +329,7 @@ export function PathView({
           <button
             onClick={() => onExplainPath?.(activeTab)}
             disabled={explainingLoading}
-            className="rounded-lg bg-accent-indigo hover:bg-accent-indigo/90 px-4.5 py-2 text-xs font-semibold text-white transition-all shadow-md disabled:opacity-40 flex items-center gap-1.5 mx-auto"
+            className="rounded-lg bg-accent-secondary hover:bg-accent-secondary/90 px-4.5 py-2 text-xs font-semibold text-white transition-all shadow-md disabled:opacity-40 flex items-center gap-1.5 mx-auto"
           >
             {explainingLoading ? (
               <>

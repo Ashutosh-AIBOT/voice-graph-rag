@@ -16,12 +16,10 @@ export function DocumentUpload() {
   const upsertDocument = useDocumentsStore((s) => s.upsertDocument);
   const isAuthed = useAuthStore((s) => s.isAuthenticated);
 
-  // Track real processing progress from the document store
   const liveDoc = uploadedDocId ? documents.find((d) => d.id === uploadedDocId) : null;
   const liveProgress = liveDoc?.processingProgress ?? 0;
   const liveStep = liveDoc?.processingStep || null;
 
-  // Clear upload state when document completes or fails
   useEffect(() => {
     if (liveDoc && (liveDoc.status === 'COMPLETED' || liveDoc.status === 'FAILED')) {
       const timer = setTimeout(() => {
@@ -31,7 +29,6 @@ export function DocumentUpload() {
       }, 2000);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveDoc?.status]);
 
   const ALLOWED_EXTS = new Set(['.pdf', '.txt', '.md', '.docx', '.doc', '.csv', '.json', '.html', '.xml']);
@@ -88,18 +85,20 @@ export function DocumentUpload() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Source input */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-text-muted">Document Source (optional)</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Document Source (optional)</label>
         <input
           type="text"
           value={source}
           onChange={(e) => setSource(e.target.value)}
-          placeholder="e.g. research-paper, company-docs, internal-wiki"
-          className="w-full rounded-md border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none"
+          placeholder="e.g. research-paper, company-docs"
+          className="w-full rounded-xl border border-border bg-bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none"
         />
       </div>
 
+      {/* Drop zone */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -112,17 +111,25 @@ export function DocumentUpload() {
           const f = e.dataTransfer.files?.[0];
           if (f) uploadFile(f);
         }}
-        className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-          dragging ? 'border-accent-cyan bg-accent-cyan/5' : 'border-border bg-bg-base'
+        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center transition-all duration-300 ${
+          dragging
+            ? 'border-accent-cyan bg-accent-cyan/5 scale-[1.02] shadow-lg shadow-accent-cyan/10'
+            : 'border-border bg-bg-surface/50 hover:border-accent-primary/30 hover:bg-bg-surface'
         }`}
       >
-        <UploadCloud className="mb-2 h-8 w-8 text-accent-cyan" />
-        <p className="text-sm font-medium text-text-primary">Drop files here or browse</p>
-        <p className="mt-1 text-xs text-text-muted">
+        <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300 ${
+          dragging ? 'bg-accent-cyan/15 scale-110' : 'bg-accent-cyan/10'
+        }`}>
+          <UploadCloud className={`h-7 w-7 transition-colors ${dragging ? 'text-accent-cyan' : 'text-accent-cyan/70'}`} />
+        </div>
+        <p className="text-sm font-bold text-text-primary">
+          {dragging ? 'Drop your file here' : 'Drop files here or browse'}
+        </p>
+        <p className="mt-1.5 text-xs text-text-muted">
           Supports: PDF, TXT, DOCX, Markdown, CSV, JSON, HTML, XML · Max 10MB
         </p>
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-accent-violet px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-violet/90">
-          <FileUp className="h-3.5 w-3.5" /> Browse
+        <label className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-gradient-to-r from-accent-primary to-accent-cyan px-4 py-2 text-xs font-bold text-white shadow-md shadow-accent-primary/20 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]">
+          <FileUp className="h-3.5 w-3.5" /> Browse Files
           <input
             type="file"
             className="hidden"
@@ -135,32 +142,36 @@ export function DocumentUpload() {
         </label>
       </div>
 
+      {/* Error */}
       {uploadError && (
-        <div className="rounded-md border border-error/30 bg-error/5 p-3 text-xs text-error">
+        <div className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-xs font-medium text-error">
           {uploadError}
         </div>
       )}
 
+      {/* Upload progress */}
       {uploading && (
-        <div className="rounded-md border border-border bg-bg-surface p-3">
-          <p className="mb-2 text-xs font-medium text-text-secondary">
+        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3">
+          <div className="flex items-center gap-2">
             {liveDoc?.status === 'COMPLETED' ? (
-              <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-3.5 w-3.5" /> Processing complete</span>
+              <span className="flex items-center gap-2 text-sm font-bold text-success">
+                <CheckCircle2 className="h-4 w-4" /> Processing complete
+              </span>
             ) : liveStep ? (
-              <>{liveStep}...</>
+              <span className="text-sm font-semibold text-text-primary">{liveStep}...</span>
             ) : (
-              <>Uploading...</>
+              <span className="text-sm font-semibold text-text-primary">Uploading...</span>
             )}
-          </p>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-bg-elevated">
+          </div>
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-bg-elevated">
             <div
-              className="h-full rounded-full transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-accent-primary to-accent-cyan transition-all duration-500 ease-out"
               style={{
                 width: `${liveProgress}%`,
-                backgroundColor: liveDoc?.status === 'COMPLETED' ? 'hsl(var(--success))' : 'hsl(var(--accent-cyan) / 0.8)'
               }}
             />
           </div>
+          <p className="text-[11px] text-text-muted">{Math.round(liveProgress)}% complete</p>
         </div>
       )}
     </div>

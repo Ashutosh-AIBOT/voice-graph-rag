@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Network, FileText, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { useGraphData } from '@/hooks/useGraphData';
 import { GraphVisualization } from '@/components/graph/GraphVisualization';
 import { useGraphStore } from '@/store/graph';
@@ -93,14 +94,14 @@ export function CommunityView() {
       </div>
 
       {graphError && (
-        <div className="mb-3 flex items-start gap-2 rounded-md border border-warning/30 bg-warning/5 p-3 text-sm text-warning">
+        <div className="mb-3 flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-warning">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{graphError}</span>
         </div>
       )}
 
       {fetchError && (
-        <div className="mb-3 flex items-start gap-2 rounded-md border border-error/30 bg-error/5 p-3 text-sm text-error">
+        <div className="mb-3 flex items-start gap-2 rounded-xl border border-error/30 bg-error/5 p-4 text-sm text-error">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{fetchError}</span>
         </div>
@@ -118,7 +119,7 @@ export function CommunityView() {
       <TabsContent value="cards" className="mt-0 flex-1 overflow-y-auto scrollbar-thin">
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-violet border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-primary border-t-transparent" />
             <p className="text-sm text-text-muted">Generating communities from your knowledge graph…</p>
             <p className="text-xs text-text-muted">This may take up to 30 seconds. Page will auto-refresh.</p>
           </div>
@@ -130,7 +131,7 @@ export function CommunityView() {
             <Card key={c.id} className="flex flex-col">
               <CardContent className="flex flex-1 flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
-                  <Network className="h-4 w-4 text-accent-violet" />
+                  <Network className="h-4 w-4 text-accent-primary" />
                   <h3 className="font-semibold">{c.label}</h3>
                 </div>
                 <div className="flex gap-3 text-xs text-text-muted">
@@ -148,12 +149,14 @@ export function CommunityView() {
                     </span>
                   ))}
                 </div>
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => expand(c.id)}
-                  className="self-start rounded-md border border-accent-violet/40 px-3 py-1.5 text-xs font-medium text-accent-violet hover:bg-accent-violet/10"
+                  className="self-start"
                 >
                   Expand Graph ▶
-                </button>
+                </Button>
               </CardContent>
             </Card>
           ))}

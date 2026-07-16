@@ -9,11 +9,11 @@ export function GraphLegendBadges() {
     <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-1.5 rounded-lg border border-border/60 bg-bg-sidebar/80 backdrop-blur-sm p-2.5">
       <p className="text-[9px] font-bold uppercase tracking-widest text-text-muted/70 mb-0.5">Graph Legend</p>
       <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-yellow-400 shadow-[0_0_6px_#FFD700]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-accent-primary shadow-[0_0_6px_hsl(var(--accent-primary))]" />
         <span className="text-[10px] text-text-secondary">Currently Cited</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_6px_theme(colors.cyan.400)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-accent-cyan shadow-[0_0_6px_hsl(var(--accent-cyan))]" />
         <span className="text-[10px] text-text-secondary">Previously Cited</span>
       </div>
       <div className="flex items-center gap-2">

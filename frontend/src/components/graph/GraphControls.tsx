@@ -15,7 +15,7 @@ export function GraphControls() {
         onClick={() => setDim(dim === 3 ? 2 : 3)}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-md border border-border bg-bg-elevated shadow-sm backdrop-blur hover:text-text-primary transition-colors',
-          dim === 3 ? 'text-accent-violet' : 'text-accent-cyan'
+          dim === 3 ? 'text-accent-primary' : 'text-accent-cyan'
         )}
         title={dim === 3 ? 'Switch to 2D' : 'Switch to 3D'}
       >

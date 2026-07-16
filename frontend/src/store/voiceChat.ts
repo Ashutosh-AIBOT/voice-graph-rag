@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface VoiceChatMessage {
   id: string;
@@ -32,6 +32,21 @@ interface VoiceChatState {
   exportSessionAsMarkdown: (sessionId: string) => string;
   getActiveSession: () => VoiceChatSession | null;
 }
+
+const clientStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
 
 export const useVoiceChatStore = create<VoiceChatState>()(
   persist(
@@ -118,6 +133,9 @@ export const useVoiceChatStore = create<VoiceChatState>()(
         return sessions.find((s) => s.id === activeSessionId) ?? null;
       },
     }),
-    { name: 'graphrag-voice-chat-history' }
+    {
+      name: 'graphrag-voice-chat-history',
+      storage: createJSONStorage(() => clientStorage),
+    }
   )
 );

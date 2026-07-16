@@ -17,14 +17,14 @@ function MessageBubble({ msg }: { msg: VoiceChatMessage }) {
   return (
     <div className={cn('flex gap-2', isUser ? 'justify-end' : 'justify-start')}>
       {!isUser && (
-        <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-violet to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
+        <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-primary to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
           AI
         </div>
       )}
       <div className={cn(
         'max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed',
         isUser
-          ? 'bg-accent-violet/20 text-text-primary border border-accent-violet/30'
+          ? 'bg-accent-primary/20 text-text-primary border border-accent-primary/30'
           : 'bg-bg-elevated text-text-primary border border-border/60'
       )}>
         {msg.content || <span className="italic text-text-muted">…</span>}
@@ -85,7 +85,7 @@ export function TranscriptStrip({
       {/* Strip header */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/40 px-3">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-3.5 w-3.5 text-accent-violet" />
+          <MessageSquare className="h-3.5 w-3.5 text-accent-primary" />
           <span className="text-xs font-semibold text-text-primary">Conversation</span>
           {messages.length > 0 && (
             <span className="rounded-full bg-bg-elevated px-1.5 py-0.5 text-[10px] text-text-muted">
@@ -136,9 +136,9 @@ export function TranscriptStrip({
               {/* Live user transcript (in-progress) */}
               {liveTranscript && (
                 <div className="flex justify-end gap-2">
-                  <div className="max-w-[80%] rounded-xl border border-accent-violet/20 bg-accent-violet/10 px-3 py-2 text-xs text-text-muted italic">
+                  <div className="max-w-[80%] rounded-xl border border-accent-primary/20 bg-accent-primary/10 px-3 py-2 text-xs text-text-muted italic">
                     {liveTranscript}
-                    <span className="ml-1 inline-block h-2 w-0.5 bg-accent-violet animate-pulse" />
+                    <span className="ml-1 inline-block h-2 w-0.5 bg-accent-primary animate-pulse" />
                   </div>
                 </div>
               )}
@@ -146,7 +146,7 @@ export function TranscriptStrip({
               {/* Live agent response (in-progress) */}
               {agentTranscript && (
                 <div className="flex justify-start gap-2">
-                  <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-violet to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
+                  <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-primary to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
                     AI
                   </div>
                   <div className="max-w-[80%] rounded-xl border border-border/60 bg-bg-elevated px-3 py-2 text-xs text-text-primary">

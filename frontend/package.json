@@ -13,6 +13,11 @@
   "dependencies": {
     "@livekit/components-react": "^2.9.23",
     "@pixiv/three-vrm": "^3.5.5",
+    "@radix-ui/react-dialog": "^1.1.19",
+    "@radix-ui/react-scroll-area": "^1.2.14",
+    "@radix-ui/react-select": "^2.3.3",
+    "@radix-ui/react-toast": "^1.2.19",
+    "@radix-ui/react-tooltip": "^1.2.12",
     "axios": "^1.7.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -44,6 +49,6 @@
     "typescript": "^5.5.4"
   },
   "overrides": {
-    "three": "^0.179.0"
+    "three": "$three"
   }
 }

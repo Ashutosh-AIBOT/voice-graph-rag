@@ -1,5 +1,20 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+const clientStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
 
 interface ThemeState {
   theme: 'dark' | 'light';
@@ -15,6 +30,9 @@ export const useThemeStore = create<ThemeState>()(
         set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
       setTheme: (theme) => set({ theme }),
     }),
-    { name: 'graphrag-theme' }
+    {
+      name: 'graphrag-theme',
+      storage: createJSONStorage(() => clientStorage),
+    }
   )
 );

@@ -70,14 +70,14 @@ export default function VoiceRagPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-bg-base relative">
       {/* ── Page Header ──────────────────────────────────────────────────── */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-4 bg-bg-sidebar/60 backdrop-blur-sm relative z-50">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4 bg-bg-base relative z-50">
         <div className="flex items-center gap-2.5 w-64">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-violet to-accent-cyan">
-            <Mic2 className="h-4 w-4 text-white" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan">
+            <Mic2 className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-text-primary leading-none">Voice RAG</h1>
-            <p className="text-[10px] text-text-muted leading-none mt-0.5">Talk with your documents</p>
+            <h1 className="text-sm font-semibold text-text-primary leading-none">Voice RAG</h1>
+            <p className="text-[11px] text-text-muted leading-none mt-0.5">Talk with your documents</p>
           </div>
         </div>
 
@@ -85,38 +85,38 @@ export default function VoiceRagPage() {
         <div className="flex-1 flex justify-center relative">
           {!isConnected ? (
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsDocSelectorOpen(!isDocSelectorOpen)}
-                className="flex items-center gap-2 bg-bg-surface border border-border rounded-full px-4 py-1.5 hover:bg-bg-elevated transition-colors shadow-sm"
+                className="flex items-center gap-2 bg-bg-surface border border-border rounded-lg px-3 py-1.5 hover:bg-bg-elevated transition-colors shadow-sm"
               >
                 <Database className="h-3.5 w-3.5 text-accent-cyan" />
-                <span className="text-[11px] font-bold text-text-primary">Knowledge Base</span>
+                <span className="text-xs font-medium text-text-primary">Knowledge Base</span>
                 <ChevronDown className={cn("h-3.5 w-3.5 text-text-muted transition-transform", isDocSelectorOpen && "rotate-180")} />
               </button>
 
               {isDocSelectorOpen && (
-                <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-bg-sidebar/95 backdrop-blur-md border border-border rounded-xl p-4 shadow-xl w-80 animate-in fade-in slide-in-from-top-2">
+                <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-bg-panel border border-border rounded-xl p-4 shadow-xl w-80 animate-in fade-in slide-in-from-top-2">
                   <MultiDocSelector />
                 </div>
               )}
             </div>
           ) : (
-             <span className="text-[10px] text-text-muted/60 bg-bg-elevated/50 px-3 py-1 rounded-full border border-border/40">Multi-Document RAG Enabled</span>
+             <span className="text-xs text-text-muted bg-bg-elevated px-3 py-1 rounded-md border border-border">Multi-Document RAG Enabled</span>
           )}
         </div>
 
         <div className="flex items-center justify-end gap-2 w-64">
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
-            <Sparkles className="h-3.5 w-3.5 text-accent-violet" />
+          <div className="flex items-center gap-1.5 text-xs text-text-muted">
+            <Sparkles className="h-3.5 w-3.5 text-accent-primary" />
             <span>Graph-grounded answers</span>
           </div>
         </div>
       </div>
 
       {/* ── Main Split-Screen ─────────────────────────────────────────────── */}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         {/* LEFT — Avatar Panel */}
-        <div className="relative w-[40%] shrink-0 border-r border-border/40 bg-[#07070a] overflow-hidden">
+        <div className="relative h-[45vh] w-full shrink-0 border-b border-border/40 bg-bg-avatar overflow-hidden md:h-auto md:w-[40%] md:border-b-0 md:border-r">
           
           {/* 3D Background - Fills completely */}
           <div className="absolute inset-0 z-0 pointer-events-auto">
@@ -129,14 +129,14 @@ export default function VoiceRagPage() {
           </div>
 
           {/* Dark Fog Gradient at the bottom for UI readability */}
-          <div className="absolute inset-x-0 bottom-0 h-[320px] bg-gradient-to-t from-[#07070a] via-[#07070a]/90 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-[320px] bg-gradient-to-t from-bg-avatar via-bg-avatar/90 to-transparent pointer-events-none z-10" />
 
           {/* Floating Controls Container at the bottom */}
           <div className="absolute inset-x-0 bottom-8 z-20 flex flex-col items-center px-8 gap-4 pointer-events-auto">
             
             {/* Status text */}
-            <div className="text-center bg-bg-surface/40 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-border/40 shadow-lg">
-              <p className="text-[11px] font-medium text-text-primary/90 leading-relaxed max-w-[280px]">
+            <div className="text-center bg-bg-surface/80 backdrop-blur-md px-4 py-2.5 rounded-xl border border-border shadow-lg">
+              <p className="text-xs font-medium text-text-primary leading-relaxed max-w-[280px]">
                 {selectedDocumentIds.length === 0
                   ? 'Select documents to begin a voice conversation grounded in your knowledge graph.'
                   : isConnected
@@ -147,7 +147,7 @@ export default function VoiceRagPage() {
             </div>
 
             {/* Voice controls */}
-            <div className="w-full max-w-[320px] bg-bg-surface/80 backdrop-blur-xl border border-border/50 p-2.5 rounded-[1.5rem] shadow-2xl">
+            <div className="w-full max-w-[320px] bg-bg-surface/90 backdrop-blur-xl border border-border p-2.5 rounded-2xl shadow-xl">
               <VoiceControls
                 agentState={agentState}
                 isMuted={isMuted}
@@ -167,7 +167,7 @@ export default function VoiceRagPage() {
           
           {/* Graph Area */}
           <div className="flex-1 relative min-h-0">
-            <GraphVisualization height="100%" hideControls={false} />
+            <GraphVisualization height="100%" hideLegend={true} />
             <GraphLegendBadges />
             <GraphEmptyOverlay />
           </div>

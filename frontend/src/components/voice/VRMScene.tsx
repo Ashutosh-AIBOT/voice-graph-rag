@@ -76,7 +76,7 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
   // Animation logic refs
   const nextBlinkTimeRef = useRef<number>(0);
   const blinkProgressRef = useRef<number | null>(null);
-  const lookAtTargetPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 1.4, 5));
+  const lookAtTargetPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 1.2, 2.0));
   const nextLookAtTimeRef = useRef<number>(0);
 
   // Sync state to ref
@@ -109,73 +109,81 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    const width = containerRef.current.clientWidth || window.innerWidth;
-    const height = containerRef.current.clientHeight || window.innerHeight;
+    let initTimer: ReturnType<typeof setTimeout>;
+    let resizeObserver: ResizeObserver;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
-    rendererRef.current = renderer;
+    // Delay init slightly to ensure container has final dimensions
+    initTimer = setTimeout(() => {
+      if (!canvasRef.current || !containerRef.current) return;
 
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+      const width = containerRef.current.clientWidth || window.innerWidth;
+      const height = containerRef.current.clientHeight || window.innerHeight;
 
-    const camera = new THREE.PerspectiveCamera(28, width / height, 0.1, 20.0);
-    const initialAspect = width / height;
-    if (initialAspect < 1.0) {
-      camera.fov = 28;
-      camera.position.set(0.0, 1.4, 2.0);
-    } else {
-      camera.fov = 8.5;
-      camera.position.set(0.0, 1.45, 1.6);
-    }
-    camera.lookAt(new THREE.Vector3(0.0, 1.36, 0.0));
-    cameraRef.current = camera;
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvasRef.current,
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setClearColor(0x000000, 0);
+      renderer.setSize(width, height, false);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+      rendererRef.current = renderer;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
-    scene.add(ambientLight);
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
-    keyLight.position.set(1.5, 2.5, 2.0);
-    scene.add(keyLight);
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    fillLight.position.set(-1.5, 1.5, 1.5);
-    scene.add(fillLight);
-    const rimLight = new THREE.PointLight(0xffffff, 2.5, 5);
-    rimLight.position.set(0.0, 1.6, -1.8);
-    scene.add(rimLight);
+      const scene = new THREE.Scene();
+      sceneRef.current = scene;
 
-    const handleResize = () => {
-      if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
-      const aspect = w / h;
-      cameraRef.current.aspect = aspect;
-
-      if (aspect < 1.0) {
-        cameraRef.current.fov = 28;
-        cameraRef.current.position.set(0.0, 1.4, 2.0);
+      const camera = new THREE.PerspectiveCamera(28, width / height, 0.1, 20.0);
+      const initialAspect = width / height;
+      if (initialAspect < 1.0) {
+        camera.fov = 28;
+        camera.position.set(0.0, 1.25, 1.85);
       } else {
-        cameraRef.current.fov = 8.5;
-        cameraRef.current.position.set(0.0, 1.45, 1.6);
+        camera.fov = 8.5;
+        camera.position.set(0.0, 1.3, 1.45);
       }
-      cameraRef.current.lookAt(new THREE.Vector3(0.0, 1.36, 0.0));
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(w, h);
-    };
+      camera.lookAt(new THREE.Vector3(0.0, 1.2, 0.0));
+      cameraRef.current = camera;
 
-    const resizeObserver = new ResizeObserver(handleResize);
-    resizeObserver.observe(containerRef.current);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+      scene.add(ambientLight);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+      keyLight.position.set(1.5, 2.5, 2.0);
+      scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      fillLight.position.set(-1.5, 1.5, 1.5);
+      scene.add(fillLight);
+      const rimLight = new THREE.PointLight(0xffffff, 2.5, 5);
+      rimLight.position.set(0.0, 1.6, -1.8);
+      scene.add(rimLight);
 
-    clockRef.current.start();
+      const handleResize = () => {
+        if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+        const w = containerRef.current.clientWidth;
+        const h = containerRef.current.clientHeight;
+        const aspect = w / h;
+        cameraRef.current.aspect = aspect;
 
-    const animate = () => {
+        if (aspect < 1.0) {
+          cameraRef.current.fov = 28;
+          cameraRef.current.position.set(0.0, 1.25, 1.85);
+        } else {
+          cameraRef.current.fov = 8.5;
+          cameraRef.current.position.set(0.0, 1.3, 1.45);
+        }
+        cameraRef.current.lookAt(new THREE.Vector3(0.0, 1.2, 0.0));
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(w, h, false);
+      };
+
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(containerRef.current);
+
+      clockRef.current.start();
+
+      const animate = () => {
       animationFrameIdRef.current = requestAnimationFrame(animate);
       if (document.visibilityState !== "visible") return;
 
@@ -256,20 +264,20 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         } else if (isCreepySmile) {
           targetHeadX = 0.15; // Kubrick stare (head down)
           // Lock target on camera
-          lookAtTargetPosRef.current.set(0, 1.35, 2.0); 
+          lookAtTargetPosRef.current.set(0, 1.2, 2.0); 
         } else if (state === "listening") {
           targetHeadX = 0.04; // Attentive nod
           targetHeadZ = Math.sin(elapsed * 0.2) * 0.02;
           
           // Cognitive gaze: lock on user
-          lookAtTargetPosRef.current.set(0, 1.35, 2.0);
+          lookAtTargetPosRef.current.set(0, 1.2, 2.0);
         } else {
           // Idle / Speaking: Saccadic eye darting
           if (elapsed > nextLookAtTimeRef.current) {
             // Saccade! Snap to new target immediately (no lerp)
             lookAtTargetPosRef.current.set(
-              (Math.random() - 0.5) * 2.0,
-              1.35 + (Math.random() - 0.5) * 0.5,
+              (Math.random() - 0.5) * 1.5,
+              1.2 + (Math.random() - 0.5) * 0.4,
               2.5
             );
             nextLookAtTimeRef.current = elapsed + 1.5 + Math.random() * 3.0;
@@ -426,8 +434,11 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
     animate();
     setSceneInitialized(true);
 
+    }, 100); // End setTimeout
+
     return () => {
-      resizeObserver.disconnect();
+      clearTimeout(initTimer);
+      if (resizeObserver) resizeObserver.disconnect();
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
       if (rendererRef.current) rendererRef.current.dispose();
     };
@@ -473,7 +484,7 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
 
         if (vrm.lookAt) {
           vrm.lookAt.target = new THREE.Object3D();
-          vrm.lookAt.target.position.set(0, 1.4, 5.0);
+          vrm.lookAt.target.position.set(0, 1.12, 1.0);
         }
 
         setLoading(false);
@@ -502,19 +513,23 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50 pointer-events-auto">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-500/20 border-t-violet-500" />
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent-primary/20 border-t-accent-primary" />
             <span className="text-xs text-white/60 tracking-wider">Summoning Avatar...</span>
           </div>
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-red-400 z-50 pointer-events-auto">
-          <div className="bg-red-950/40 border border-red-500/20 px-6 py-3 rounded-2xl backdrop-blur-md">
+        <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-error z-50 pointer-events-auto">
+          <div className="bg-error/15 border border-error/20 px-6 py-3 rounded-2xl backdrop-blur-md">
             {error}
           </div>
         </div>
       )}
-      <canvas ref={canvasRef} className="h-full w-full block pointer-events-auto" />
+      <canvas
+        ref={canvasRef}
+        style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+        className="pointer-events-auto"
+      />
     </div>
   );
 }

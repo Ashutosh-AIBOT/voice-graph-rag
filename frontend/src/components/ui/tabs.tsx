@@ -56,7 +56,7 @@ export function TabsTrigger({
       className={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-1.5 text-sm font-medium transition-all',
         active === value
-          ? 'bg-accent-violet text-white shadow'
+          ? 'bg-accent-primary text-white shadow'
           : 'text-text-secondary hover:text-text-primary',
         className
       )}
