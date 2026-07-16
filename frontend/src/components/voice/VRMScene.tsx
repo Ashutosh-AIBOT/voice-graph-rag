@@ -6,6 +6,17 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRMLoaderPlugin, VRMUtils, VRM } from "@pixiv/three-vrm";
 import { AudioMetrics } from "@/hooks/useAvatarLipSync";
 
+// Phase 1 Imports (Scaffolding)
+import { AvatarStateMachine } from "@/state/avatarStateMachine";
+import { GrabMechanic } from "@/state/grabMechanic";
+import { ModeController } from "@/state/modeController";
+import { MoodDetector } from "@/mood/moodDetector";
+import { MoodColorLayer } from "@/mood/moodColorLayer";
+import { SpringEdges } from "@/render/springEdges";
+import { NodeField } from "@/render/nodeField";
+import { IKController } from "@/render/ikController";
+import { PERSONAS } from "@/state/personalitySystem";
+import { ParticleFXEngine } from "@/render/particleFX";
 class CustomClock {
   private startTime: number;
   private oldTime: number;
@@ -65,6 +76,11 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
   const [error, setError] = useState<string | null>(null);
   const [sceneInitialized, setSceneInitialized] = useState(false);
 
+  // Phase 17: Personality configuration
+  const activePersona = Object.values(PERSONAS).find(p => p.vrmUrl === avatarUrl) || PERSONAS['calm_tutor'];
+  const bSpeed = activePersona.breathingSpeed;
+  const gIntensity = activePersona.gestureIntensity;
+
   // Three.js and animation refs
   const currentVRMRef = useRef<VRM | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -72,12 +88,14 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const clockRef = useRef<CustomClock>(new CustomClock());
+  const ikControllerRef = useRef<IKController>(new IKController());
 
   // Animation logic refs
   const nextBlinkTimeRef = useRef<number>(0);
   const blinkProgressRef = useRef<number | null>(null);
   const lookAtTargetPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 1.4, 5));
   const nextLookAtTimeRef = useRef<number>(0);
+  const wasBigLaughRef = useRef<boolean>(false);
 
   // Sync state to ref
   const stateRef = useRef(state);
@@ -102,7 +120,16 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
     mouthEe: new SpringFloat(0, 80, 0.6),
     happy: new SpringFloat(0, 30, 0.9),
     angry: new SpringFloat(0, 30, 0.9),
-    relaxed: new SpringFloat(0, 30, 0.9)
+    relaxed: new SpringFloat(0, 30, 0.9),
+    
+    // Phase 11: Camera Springs
+    camX: new SpringFloat(0.0, 10, 0.9),
+    camY: new SpringFloat(1.45, 10, 0.9),
+    camZ: new SpringFloat(1.6, 10, 0.9),
+    camFov: new SpringFloat(22, 10, 0.9),
+    camTargetX: new SpringFloat(0.0, 15, 0.8),
+    camTargetY: new SpringFloat(1.35, 15, 0.8),
+    camTargetZ: new SpringFloat(0.0, 15, 0.8),
   }).current;
 
   // Initialize Three.js Scene
@@ -124,8 +151,27 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
     renderer.toneMappingExposure = 1.1;
     rendererRef.current = renderer;
 
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      console.warn("WebGL Context Lost - Pausing render loop");
+      if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
+    };
+
+    const handleContextRestored = () => {
+      console.log("WebGL Context Restored - Rebuilding scene");
+      // For a true rebuild, we'd trigger a full re-render of this component
+      // For now, restarting the loop
+      clockRef.current.start();
+      animationFrameIdRef.current = requestAnimationFrame(animate);
+    };
+
+    canvasRef.current.addEventListener('webglcontextlost', handleContextLost, false);
+    canvasRef.current.addEventListener('webglcontextrestored', handleContextRestored, false);
+
     const scene = new THREE.Scene();
     sceneRef.current = scene;
+
+    ParticleFXEngine.init(scene);
 
     const camera = new THREE.PerspectiveCamera(28, width / height, 0.1, 20.0);
     const initialAspect = width / height;
@@ -153,22 +199,48 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
 
     const handleResize = () => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
-      const aspect = w / h;
+      const width = containerRef.current.clientWidth || window.innerWidth;
+      const height = containerRef.current.clientHeight || window.innerHeight;
+      const aspect = width / height;
+
       cameraRef.current.aspect = aspect;
 
+      const isBrowseMode = useModeController.getState().mode === 'browse';
+
+      // Update spring targets instead of snapping
       if (aspect < 1.0) {
-        cameraRef.current.fov = 28;
-        cameraRef.current.position.set(0.0, 1.4, 2.0);
+        springs.camFov.target = 28;
+        springs.camX.target = isBrowseMode ? 0.2 : 0.0;
+        springs.camY.target = 1.4;
+        springs.camZ.target = isBrowseMode ? 2.8 : 2.0;
       } else {
-        cameraRef.current.fov = 22;
-        cameraRef.current.position.set(0.0, 1.45, 1.6);
+        springs.camFov.target = 22;
+        // In browse mode (1.3fr/1fr layout), left panel center is ~28% of screen.
+        // We pan the camera to the RIGHT to shift the avatar LEFT.
+        // The required shift depends on the aspect ratio and distance.
+        // At Z=2.5, FOV=22, Height = ~0.97m. Width = 0.97 * aspect.
+        // To shift by ~22% of screen width: 0.22 * 0.97 * aspect = 0.21 * aspect.
+        const xOffset = isBrowseMode ? 0.21 * aspect : 0.0;
+        springs.camX.target = xOffset;
+        springs.camY.target = 1.45;
+        springs.camZ.target = isBrowseMode ? 2.5 : 1.6;
+        
+        springs.camTargetX.target = xOffset;
+        springs.camTargetY.target = 1.35;
+        springs.camTargetZ.target = 0.0;
       }
-      cameraRef.current.lookAt(new THREE.Vector3(0.0, 1.35, 0.0));
+
+      // Update projection immediately for aspect ratio correctness, but physics loop handles position/fov
       cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(w, h);
+
+      rendererRef.current.setSize(width, height);
     };
+
+    // Listen to mode changes to update camera framing dynamically
+    const onModeChanged = () => {
+      handleResize();
+    };
+    window.addEventListener('mode:changed', onModeChanged);
 
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(containerRef.current);
@@ -176,7 +248,15 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
     clockRef.current.start();
 
     const animate = () => {
-      animationFrameIdRef.current = requestAnimationFrame(animate);
+      // Phase 12: Performance - Pause render loop on tab visibility loss
+      if (document.visibilityState === 'visible') {
+        animationFrameIdRef.current = requestAnimationFrame(animate);
+      } else {
+        // We still need to loop slowly or wait for visibility
+        // Actually, requestAnimationFrame naturally pauses when hidden, 
+        // but explicit skip saves background processing
+        animationFrameIdRef.current = requestAnimationFrame(animate);
+      }
       if (document.visibilityState !== "visible") return;
 
       const delta = clockRef.current.getDelta();
@@ -191,12 +271,26 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         // -- CORE MECHANICS --
         let isBigLaugh = false;
         let isCreepySmile = false;
-        let isHardMovement = false;
-
-        // Trigger logic
+        
         if (state === "speaking" && audio.volume > 0.8) isBigLaugh = true;
-        if (state === "thinking") isCreepySmile = true; // Use thinking state to demo the creepy stare
-        if (state === "speaking" && audio.derivative > 0.15) isHardMovement = true;
+        if (state === "thinking" && elapsed % 6.0 > 4.5) isCreepySmile = true; // Randomly during thinking
+        
+        // Phase 19: Big Laugh Particles
+        if (isBigLaugh && !wasBigLaughRef.current && currentVRMRef.current && currentVRMRef.current.scene) {
+           const chestPos = new THREE.Vector3();
+           const chestNode = humanoid?.getNormalizedBoneNode("chest");
+           if (chestNode) chestNode.getWorldPosition(chestPos);
+           window.dispatchEvent(new CustomEvent('fx:trigger', { detail: { effect: 'big_laugh', position: chestPos } }));
+        }
+        wasBigLaughRef.current = isBigLaugh;
+
+        if (state === "sign_off" && stateRef.current !== "sign_off") {
+           const rootPos = new THREE.Vector3();
+           currentVRMRef.current?.scene.getWorldPosition(rootPos);
+           window.dispatchEvent(new CustomEvent('fx:trigger', { detail: { effect: 'signoff_sparkle', position: rootPos } }));
+        }
+
+        let isHardMovement = (state === "speaking" && audio.derivative > 0.15);
 
         // 1. Weight Shifting (Hips) & Breathing
         // Shift weight every 8 seconds
@@ -223,22 +317,36 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
           targetSpineX = 0.08; 
           springs.spineX.tension = 30;
         } else {
-          // Normal breathing
-          targetSpineX = Math.sin(elapsed * 1.5) * 0.01;
+          // Apply Persona Breathing Speed
+          const breathElapsed = elapsed * bSpeed;
+          
+          if (state === "speaking") {
+            targetSpineX = Math.sin(breathElapsed * 25) * 0.03 * gIntensity;
+            targetSpineY += Math.sin(breathElapsed * 15) * 0.02 * gIntensity;
+            
+            // Random micro-gestures based on idleMicroActionFrequency
+            if (Math.random() < 0.02 * activePersona.idleMicroActionFrequency) {
+              springs.spineX.velocity += (Math.random() - 0.5) * 5 * gIntensity;
+              springs.spineY.velocity += (Math.random() - 0.5) * 5 * gIntensity;
+            }
+          } else {
+            targetSpineX = Math.sin(breathElapsed * 1.5) * 0.01;
+            targetSpineY += Math.sin(breathElapsed * 1.2) * 0.01;
+          }
           springs.spineX.tension = 40;
         }
 
         springs.spineX.target = targetSpineX;
         springs.spineY.target = targetSpineY;
-        
+
         if (spine) {
           spine.rotation.x = springs.spineX.update(delta);
           spine.rotation.y = springs.spineY.update(delta);
         }
+        
         if (chest && !isCreepySmile) {
-          chest.rotation.x = Math.sin(elapsed * 1.5) * 0.005; // Extra chest breath
+          chest.rotation.x = Math.sin(elapsed * bSpeed * 1.5) * 0.005; // Extra chest breath
         }
-
         // Micro-tremor on neck for life-like presence
         if (neck && !isBigLaugh) {
           const tremor = (Math.random() - 0.5) * 0.002;
@@ -299,7 +407,12 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         let targetRArmX = 0.1;
         let rArmTension = 40;
 
-        if (isBigLaugh) {
+        if (state === "sign_off") {
+          // Phase 1: Waving goodbye (sign_off gesture)
+          targetRArmZ = -1.5;
+          targetRArmX = 1.0 + Math.sin(elapsed * 15) * 0.5; // rapid wave
+          rArmTension = 80;
+        } else if (isBigLaugh) {
           // Hands to belly
           targetRArmZ = -0.5;
           targetRArmX = -0.3;
@@ -312,6 +425,11 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
           // Soft conversational gesturing
           targetRArmZ = -1.0 - Math.sin(elapsed * 2) * 0.1;
           targetRArmX = 0.2 + Math.cos(elapsed * 2) * 0.1;
+        } else if (state === "idle") {
+          // Phase 2: Additive micro-actions on top of breathing
+          if (elapsed % 5.0 > 4.5) {
+             targetRArmZ = -1.2 + 0.05; // slight arm twitch/weight shift
+          }
         }
 
         springs.rArmZ.tension = rArmTension;
@@ -342,12 +460,12 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         let targetRelaxed = 0;
 
         if (isBigLaugh) {
-          targetHappy = 1.0;
+          targetHappy = activePersona.expressionRange.happyMax;
         } else if (isCreepySmile) {
-          targetHappy = 1.0;
-          targetAngry = 0.45; // Lowers brow to create creepy stare
+          targetHappy = activePersona.expressionRange.happyMax;
+          targetAngry = activePersona.expressionRange.angryMax * 0.5; // Lowers brow to create creepy stare
         } else if (state === "listening") {
-          targetHappy = 0.6;
+          targetHappy = activePersona.expressionRange.happyMax * 0.6;
         } else {
           targetRelaxed = 0.5;
           targetHappy = 0.1;
@@ -416,11 +534,62 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
           expression.setValue("ee", springs.mouthEe.update(delta));
         }
 
+        // Phase 16: Dynamic IK Targeting
+        if (stateRef.current === "thinking" || stateRef.current === "speaking") {
+          // Look towards the "Docs" area (top left)
+          const target = new THREE.Vector3(-0.5, 1.6, 1.0);
+          ikControllerRef.current.setTarget(target, true);
+        } else if (stateRef.current === "sit_on_node" || stateRef.current === "flee_with_node") {
+          // Look towards the "Graph" area (bottom right)
+          const target = new THREE.Vector3(0.5, 1.0, 1.0);
+          ikControllerRef.current.setTarget(target, true);
+        } else {
+          ikControllerRef.current.setTarget(new THREE.Vector3(), false);
+        }
+
+        // Phase 16: IK Controller update (must happen after procedural to override it)
+        ikControllerRef.current.update(delta);
+
         currentVRMRef.current.update(delta);
       }
 
+      // Phase 11: Camera Physics
+      if (cameraRef.current) {
+        cameraRef.current.position.set(
+          springs.camX.update(delta),
+          springs.camY.update(delta),
+          springs.camZ.update(delta)
+        );
+        cameraRef.current.fov = springs.camFov.update(delta);
+        cameraRef.current.updateProjectionMatrix();
+        cameraRef.current.lookAt(
+          springs.camTargetX.update(delta),
+          springs.camTargetY.update(delta),
+          springs.camTargetZ.update(delta)
+        );
+      }
+
       if (sceneRef.current && cameraRef.current && rendererRef.current) {
+        // Phase 19: Particles
+        ParticleFXEngine.update(delta);
+
         rendererRef.current.render(sceneRef.current, cameraRef.current);
+        
+        // Phase 18: Spatial Audio Tracking
+        if (currentVRMRef.current && currentVRMRef.current.scene) {
+          const pos = new THREE.Vector3();
+          currentVRMRef.current.scene.getWorldPosition(pos);
+          pos.project(cameraRef.current);
+          
+          window.dispatchEvent(new CustomEvent('audio:spatial-update', {
+            detail: {
+              x: Math.max(-1, Math.min(1, pos.x)), // Clamp to screen -1 to 1
+              y: pos.y,
+              z: currentVRMRef.current.scene.position.z, // Use world Z for distance
+              isBrowseMode: useModeController.getState().mode === 'browse'
+            }
+          }));
+        }
       }
     };
     animate();
@@ -428,6 +597,7 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
 
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener('mode:changed', onModeChanged);
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
       if (rendererRef.current) rendererRef.current.dispose();
     };
@@ -469,6 +639,7 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
         if (vrm.meta?.metaVersion === "0") VRMUtils.rotateVRM0(vrm);
 
         currentVRMRef.current = vrm;
+        ikControllerRef.current.setVRM(vrm);
         sceneRef.current?.add(vrm.scene);
 
         if (vrm.lookAt) {
@@ -487,13 +658,49 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
       }
     );
 
+    const onStateChanged = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      stateRef.current = customEvent.detail.state;
+    };
+
+    const onNodeTugged = (e: Event) => {
+      // Phase 11: subtle camera micro-shake per tug cycle
+      springs.camTargetX.target += (Math.random() - 0.5) * 0.05;
+      springs.camTargetY.target += (Math.random() - 0.5) * 0.05;
+      
+      // Restore targeting quickly
+      setTimeout(() => {
+        springs.camTargetX.target = 0.0;
+        springs.camTargetY.target = 1.35;
+      }, 150);
+    };
+
+    const onIKPoint = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.target) {
+        ikControllerRef.current.setTarget(customEvent.detail.target, true);
+      } else {
+        ikControllerRef.current.setTarget(new THREE.Vector3(), false); // Disable IK
+      }
+    };
+
+    window.addEventListener('avatar:state_changed', onStateChanged);
+    window.addEventListener('node:tugged', onNodeTugged);
+    window.addEventListener('ik:point-at', onIKPoint);
+
     return () => {
       active = false;
       if (currentVRMRef.current && sceneRef.current) {
         sceneRef.current.remove(currentVRMRef.current.scene);
         VRMUtils.deepDispose(currentVRMRef.current.scene);
-        currentVRMRef.current = null;
       }
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+      }
+      if (rendererRef.current) rendererRef.current.dispose();
+      window.removeEventListener('avatar:state_changed', onStateChanged);
+      window.removeEventListener('node:tugged', onNodeTugged);
+      window.removeEventListener('ik:point-at', onIKPoint);
     };
   }, [avatarUrl, sceneInitialized]);
 

@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+type ThemeType = 'dark' | 'gold';
+
 interface ThemeState {
-  theme: 'dark' | 'light';
+  theme: ThemeType;
   toggleTheme: () => void;
-  setTheme: (theme: 'dark' | 'light') => void;
+  setTheme: (theme: ThemeType) => void;
 }
 
 export const useThemeStore = create<ThemeState>()(
@@ -12,7 +14,7 @@ export const useThemeStore = create<ThemeState>()(
     (set) => ({
       theme: 'dark',
       toggleTheme: () =>
-        set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+        set((state) => ({ theme: state.theme === 'dark' ? 'gold' : 'dark' })),
       setTheme: (theme) => set({ theme }),
     }),
     { name: 'graphrag-theme' }

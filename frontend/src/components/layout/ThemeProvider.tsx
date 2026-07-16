@@ -5,10 +5,12 @@ import { useThemeStore } from '@/store/theme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useThemeStore((s) => s.theme);
+  
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') root.classList.add('dark');
-    else root.classList.remove('dark');
+    root.setAttribute('data-theme', theme);
+    window.dispatchEvent(new CustomEvent('graphrag:theme', { detail: { theme } }));
   }, [theme]);
+  
   return <>{children}</>;
 }

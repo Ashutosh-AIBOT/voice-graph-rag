@@ -4,39 +4,75 @@
 
 @layer base {
   :root {
-    --bg-base: 0 0% 100%;
-    --bg-surface: 220 14% 96%;
-    --bg-elevated: 220 14% 94%;
-    --bg-sidebar: 220 14% 96%;
-    --accent-violet: 262 83% 58%;
-    --accent-indigo: 232 90% 65%;
-    --accent-cyan: 188 94% 42%;
-    --text-primary: 224 71% 4%;
-    --text-secondary: 224 10% 35%;
-    --text-muted: 220 9% 55%;
-    --border: 220 13% 91%;
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
-    --error: 0 72% 55%;
-    --ring: 262 83% 58%;
+    /* Default to dark theme if no data-theme is set */
+    --bg: 240 20% 5%;
+    --bg2: 240 20% 4%;
+    --panel: 240 11% 9%;
+    --panel2: 240 12% 12%;
+    --panel3: 240 14% 15%;
+    --border: 240 13% 17%;
+    --border-soft: 240 12% 13%;
+    --text: 43 20% 93%;
+    --text2: 250 8% 57%;
+    --text3: 248 12% 37%;
+    --accent: 247 87% 73%;
+    --accent-dim: 249 34% 49%;
+    --accent-soft: 247 86% 73%; /* using tailwind bg-accent/14 for opacity where needed, but keeping variable */
+    --accent-text: 240 20% 5%;
+    
+    --e-person: 221 100% 71%;
+    --e-tech: 249 93% 77%;
+    --e-concept: 319 73% 66%;
+    --e-product: 28 82% 67%;
+    --e-document: 174 61% 59%;
+    --e-org: 146 61% 59%;
+    --e-event: 336 85% 66%;
+    --e-location: 45 86% 62%;
+    
+    /* Mood System Default Values */
+    --mood-hue: 163;
+    --mood-sat: 100%;
+    --mood-intensity: 0;
+    --mood-glow-x: 50vw;
+    --mood-glow-y: 50vh;
   }
 
-  .dark {
-    --bg-base: 224 71% 4%;
-    --bg-surface: 215 28% 11%;
-    --bg-elevated: 215 25% 15%;
-    --bg-sidebar: 215 28% 10%;
-    --accent-violet: 262 83% 58%;
-    --accent-indigo: 232 90% 65%;
-    --accent-cyan: 188 94% 42%;
-    --text-primary: 0 0% 98%;
-    --text-secondary: 215 20% 65%;
-    --text-muted: 215 15% 50%;
-    --border: 215 20% 15%;
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
-    --error: 0 72% 55%;
-    --ring: 262 83% 58%;
+  [data-theme="dark"] {
+    --bg: 240 20% 5%;
+    --bg2: 240 20% 4%;
+    --panel: 240 11% 9%;
+    --panel2: 240 12% 12%;
+    --panel3: 240 14% 15%;
+    --border: 240 13% 17%;
+    --border-soft: 240 12% 13%;
+    --text: 43 20% 93%;
+    --text2: 250 8% 57%;
+    --text3: 248 12% 37%;
+    --accent: 247 87% 73%;
+    --accent-dim: 249 34% 49%;
+    --accent-text: 240 20% 5%;
+
+    --mood-hue: 163;
+    --mood-sat: 100%;
+    --mood-intensity: 0;
+    --mood-glow-x: 50vw;
+    --mood-glow-y: 50vh;
+  }
+
+  [data-theme="gold"] {
+    --bg: 42 70% 94%;
+    --bg2: 42 62% 90%;
+    --panel: 40 100% 99%;
+    --panel2: 43 83% 91%;
+    --panel3: 43 74% 86%;
+    --border: 44 54% 80%;
+    --border-soft: 44 60% 84%;
+    --text: 40 46% 12%;
+    --text2: 43 27% 43%;
+    --text3: 45 31% 58%;
+    --accent: 38 90% 38%;
+    --accent-dim: 39 89% 30%;
+    --accent-text: 40 100% 96%;
   }
 }
 
@@ -45,8 +81,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-bg-base text-text-primary;
+    @apply bg-bg2 text-text;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  
+  /* Apply selection token rules */
+  ::selection {
+    @apply bg-accent text-accent-text;
   }
 }
 
@@ -66,9 +107,86 @@
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
+  
+  .clip-path-avatar-box {
+    /* Default fallback if JS hasn't updated yet */
+    clip-path: inset(16px calc(100vw - 300px) calc(100vh - 600px) 16px);
+  }
+
+  .mood-glow-layer {
+    background: radial-gradient(
+      circle at var(--mood-glow-x) var(--mood-glow-y),
+      hsl(var(--mood-hue) var(--mood-sat) 15% / var(--mood-intensity)),
+      transparent 60%
+    );
+    transition: background 1.5s ease;
+  }
 }
 
 /* React Force Graph canvas should fill container */
 .graph-canvas canvas {
   outline: none;
 }
+
+/* Animations */
+@keyframes viseme {
+  from { transform: scaleY(0.4); opacity: 0.55; }
+  to { transform: scaleY(1.5); opacity: 1; }
+}
+
+@keyframes ringPulse {
+  from { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.5), inset 0 0 0 0 hsl(var(--accent) / 0.5); }
+  to { box-shadow: 0 0 0 9px transparent, inset 0 0 0 9px transparent; }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(14deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.018); }
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 hsl(var(--accent-soft) / 0.8); }
+  70% { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ambientPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.animate-viseme { animation: viseme 0.15s ease-in-out alternate infinite; }
+.animate-ringPulse { animation: ringPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-wave { animation: wave 2s ease-in-out infinite; transform-origin: bottom center; }
+.animate-breathe { animation: breathe 4s ease-in-out infinite; transform-origin: bottom center; }
+.animate-floaty { animation: floaty 6s ease-in-out infinite; }
+.animate-micPulse { animation: micPulse 1.4s ease-out infinite; }
+.animate-dotPulse { animation: dotPulse 2s ease-in-out infinite; }
+.animate-spin-slow { animation: spin 3s linear infinite; }
+.animate-fadein { animation: fadein 0.3s ease-out forwards; }
+.animate-ambientPulse { animation: ambientPulse 8s ease-in-out infinite; }

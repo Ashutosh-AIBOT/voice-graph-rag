@@ -11,8 +11,11 @@ fi
 # Activate the unified venv
 source ../venv/bin/activate
 
-# Install all universal requirements
-pip install -r ../requirements.txt
+# Ensure pip is available in the venv (especially important when using Conda)
+python3 -m ensurepip --upgrade > /dev/null 2>&1
+
+# Install all universal requirements explicitly using the venv's python
+python3 -m pip install -r ../requirements.txt
 
 # Run the agent in dev mode to connect with the web frontend
 PYTHONPATH=. python agent.py dev

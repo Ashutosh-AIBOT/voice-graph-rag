@@ -89,14 +89,14 @@ export function DocumentUpload() {
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-text-muted">Document Source (optional)</label>
+      <div className="space-y-[6px]">
+        <label className="text-[11px] font-semibold text-text2 uppercase tracking-[0.04em]">Document Source (optional)</label>
         <input
           type="text"
           value={source}
           onChange={(e) => setSource(e.target.value)}
           placeholder="e.g. research-paper, company-docs, internal-wiki"
-          className="w-full rounded-md border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none"
+          className="w-full rounded-[8px] border border-border bg-panel2 px-3 py-2 text-[12px] text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20 transition-all"
         />
       </div>
 
@@ -112,17 +112,19 @@ export function DocumentUpload() {
           const f = e.dataTransfer.files?.[0];
           if (f) uploadFile(f);
         }}
-        className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-          dragging ? 'border-accent-cyan bg-accent-cyan/5' : 'border-border bg-bg-base'
+        className={`flex flex-col items-center justify-center rounded-[12px] border-[1.5px] border-dashed p-[24px] text-center transition-all ${
+          dragging ? 'border-accent bg-accent-soft' : 'border-border bg-panel2 hover:border-accent hover:bg-accent-soft'
         }`}
       >
-        <UploadCloud className="mb-2 h-8 w-8 text-accent-cyan" />
-        <p className="text-sm font-medium text-text-primary">Drop files here or browse</p>
-        <p className="mt-1 text-xs text-text-muted">
-          Supports: PDF, TXT, DOCX, Markdown, CSV, JSON, HTML, XML · Max 10MB
+        <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-panel3 mb-[12px]">
+          <UploadCloud className="h-[20px] w-[20px] text-accent" />
+        </div>
+        <h4 className="text-[12.5px] font-semibold text-text">Drop files here or browse</h4>
+        <p className="mt-[4px] text-[10.5px] text-text3 leading-[1.5] max-w-[200px]">
+          Supports: PDF, TXT, DOCX, Markdown, CSV, JSON, HTML, XML (Max 10MB)
         </p>
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-accent-violet px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-violet/90">
-          <FileUp className="h-3.5 w-3.5" /> Browse
+        <label className="mt-[16px] inline-flex cursor-pointer items-center gap-[6px] rounded-[8px] bg-accent px-[14px] py-[8px] text-[11px] font-semibold text-accent-text hover:bg-accent/90 transition-colors shadow-sm">
+          <FileUp className="h-[14px] w-[14px]" /> Browse
           <input
             type="file"
             className="hidden"

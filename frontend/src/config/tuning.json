@@ -1,0 +1,9 @@
+{
+  "transitionTiming": { "labelFadeMs": 100, "sidebarCollapseMs": 280, "panelStaggerMs": 60, "panelExitMs": 180, "avatarUnframeMs": 260, "canvasExpandDelayMs": 460, "avatarStepForwardMs": 240, "totalSequenceMs": 900 },
+  "grabDifficulty": { "leafMax": 2, "midMax": 6, "baseEffort": 1.0, "degreeMultiplier": 0.4, "effortPerTug": 1.5, "maxTugCycles": 6 },
+  "springEdges": { "stiffness": 0.08, "damping": 0.85 },
+  "moodDebounce": { "turnsBeforeSwitch": 3, "uncertainFlashMs": 250 },
+  "camera": { "followLagSeconds": 0.25, "maxFovShiftDegrees": 3, "minEaseMs": 200 },
+  "idleVariation": { "microActionMinSeconds": 4, "microActionMaxSeconds": 8 },
+  "floatingPanels": { "autoHideSeconds": 7 }
+}

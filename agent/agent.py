@@ -6,7 +6,9 @@ import os
 from dotenv import load_dotenv
 from livekit import agents
 from livekit.agents import Agent, AgentServer, AgentSession, JobContext, room_io, llm
-from livekit.plugins import noise_cancellation, silero, openai
+import livekit.plugins.noise_cancellation as noise_cancellation
+import livekit.plugins.silero as silero
+import livekit.plugins.openai as openai
 from livekit.agents import stt, tts, inference
 from livekit.agents import AgentStateChangedEvent, MetricsCollectedEvent, metrics
 import httpx

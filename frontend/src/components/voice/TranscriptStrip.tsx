@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useVoiceChatStore, VoiceChatMessage } from '@/store/voiceChat';
-import { MessageSquare, History, ChevronDown, Download } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface TranscriptStripProps {
@@ -10,35 +11,23 @@ interface TranscriptStripProps {
   liveTranscript: string;
   agentTranscript: string;
   onToggleHistory: () => void;
+  onNewChat: () => void;
 }
 
 function MessageBubble({ msg }: { msg: VoiceChatMessage }) {
   const isUser = msg.role === 'user';
+  // Note: system bubble (transparent dashed) can be added if your store has role='system'
+  const isSystem = msg.role === 'system';
+
   return (
-    <div className={cn('flex gap-2', isUser ? 'justify-end' : 'justify-start')}>
-      {!isUser && (
-        <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-violet to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
-          AI
-        </div>
-      )}
-      <div className={cn(
-        'max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed',
-        isUser
-          ? 'bg-accent-violet/20 text-text-primary border border-accent-violet/30'
-          : 'bg-bg-elevated text-text-primary border border-border/60'
-      )}>
-        {msg.content || <span className="italic text-text-muted">…</span>}
-        {msg.citedNodes && msg.citedNodes.length > 0 && (
-          <p className="mt-1.5 text-[10px] text-text-muted/70 border-t border-border/40 pt-1">
-            📍 {msg.citedNodes.slice(0, 3).join(', ')}{msg.citedNodes.length > 3 ? ` +${msg.citedNodes.length - 3}` : ''}
-          </p>
-        )}
-      </div>
-      {isUser && (
-        <div className="h-6 w-6 shrink-0 rounded-full bg-bg-elevated border border-border flex items-center justify-center text-[10px] font-bold text-text-secondary mt-0.5">
-          You
-        </div>
-      )}
+    <div className={cn(
+      'shrink-0 max-w-[280px] rounded-[11px] px-[12px] py-[7px] text-[12px] whitespace-normal leading-relaxed',
+      isSystem ? 'bg-transparent border border-dashed border-border text-text3 italic'
+      : isUser
+        ? 'bg-panel2 text-text'
+        : 'bg-accent text-accent-text'
+    )}>
+      {msg.content || <span className="italic opacity-50">…</span>}
     </div>
   );
 }
@@ -47,19 +36,20 @@ export function TranscriptStrip({
   sessionId,
   liveTranscript,
   agentTranscript,
-  onToggleHistory,
+  onNewChat,
 }: TranscriptStripProps) {
   const messages = useVoiceChatStore((s) =>
     sessionId ? s.sessions.find((sess) => sess.id === sessionId)?.messages ?? [] : []
   );
   const exportSessionAsMarkdown = useVoiceChatStore((s) => s.exportSessionAsMarkdown);
 
-  const [isExpanded, setIsExpanded] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to end on new messages
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
   }, [messages, liveTranscript, agentTranscript]);
 
   const handleDownloadSession = useCallback(() => {
@@ -77,90 +67,58 @@ export function TranscriptStrip({
   }, [sessionId, exportSessionAsMarkdown]);
 
   return (
-    <div className={cn(
-      'flex flex-col border-t border-border/60 bg-bg-sidebar/80 backdrop-blur-sm',
-      'transition-all duration-300',
-      isExpanded ? 'h-48' : 'h-10'
-    )}>
-      {/* Strip header */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/40 px-3">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-3.5 w-3.5 text-accent-violet" />
-          <span className="text-xs font-semibold text-text-primary">Conversation</span>
-          {messages.length > 0 && (
-            <span className="rounded-full bg-bg-elevated px-1.5 py-0.5 text-[10px] text-text-muted">
-              {messages.length}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1">
-          {sessionId && messages.length > 0 && (
-            <button
-              onClick={handleDownloadSession}
-              title="Download session as Markdown"
-              className="rounded p-1 text-text-muted hover:bg-bg-elevated hover:text-accent-cyan transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <button
-            onClick={onToggleHistory}
-            title="Chat history"
-            className="rounded p-1 text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
-          >
-            <History className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={() => setIsExpanded((v) => !v)}
-            className="rounded p-1 text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
-          >
-            <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', !isExpanded && 'rotate-180')} />
-          </button>
-        </div>
+    <div className="flex items-center rounded-[12px] border border-border bg-panel px-[14px] py-[11px] h-[64px] relative">
+      
+      {/* Label */}
+      <div className="shrink-0 mr-4">
+        <span className="text-[10.5px] font-bold text-text3 tracking-[0.02em]">TRANSCRIPT</span>
       </div>
 
-      {/* Messages area */}
-      {isExpanded && (
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2.5 scrollbar-thin">
-          {messages.length === 0 && !liveTranscript && !agentTranscript ? (
-            <p className="text-center text-[11px] text-text-muted/60 py-4">
-              Start speaking to begin the conversation…
-            </p>
-          ) : (
-            <>
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} msg={msg} />
-              ))}
+      {/* Bubble Row */}
+      <div 
+        ref={scrollRef}
+        className="flex-1 flex items-center gap-[8px] overflow-x-auto scrollbar-none scroll-smooth mr-4 mask-edges"
+        style={{ maskImage: 'linear-gradient(to right, transparent, black 10px, black calc(100% - 20px), transparent)' }}
+      >
+        {messages.length === 0 && !liveTranscript && !agentTranscript ? (
+          <span className="text-[11px] text-text3 italic px-2">No transcript yet...</span>
+        ) : (
+          <>
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} msg={msg} />
+            ))}
 
-              {/* Live user transcript (in-progress) */}
-              {liveTranscript && (
-                <div className="flex justify-end gap-2">
-                  <div className="max-w-[80%] rounded-xl border border-accent-violet/20 bg-accent-violet/10 px-3 py-2 text-xs text-text-muted italic">
-                    {liveTranscript}
-                    <span className="ml-1 inline-block h-2 w-0.5 bg-accent-violet animate-pulse" />
-                  </div>
-                </div>
-              )}
+            {/* Live user transcript (in-progress) */}
+            {liveTranscript && (
+              <div className="shrink-0 max-w-[280px] rounded-[11px] bg-panel2 text-text px-[12px] py-[7px] text-[12px] whitespace-normal leading-relaxed italic opacity-80">
+                {liveTranscript}
+                <span className="ml-1 inline-block h-2 w-0.5 bg-accent animate-pulse" />
+              </div>
+            )}
 
-              {/* Live agent response (in-progress) */}
-              {agentTranscript && (
-                <div className="flex justify-start gap-2">
-                  <div className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-accent-violet to-accent-cyan flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
-                    AI
-                  </div>
-                  <div className="max-w-[80%] rounded-xl border border-border/60 bg-bg-elevated px-3 py-2 text-xs text-text-primary">
-                    {agentTranscript}
-                    <span className="ml-1 inline-block h-2 w-0.5 bg-accent-cyan animate-pulse" />
-                  </div>
-                </div>
-              )}
+            {/* Live agent response (in-progress) */}
+            {agentTranscript && (
+              <div className="shrink-0 max-w-[280px] rounded-[11px] bg-accent text-accent-text px-[12px] py-[7px] text-[12px] whitespace-normal leading-relaxed opacity-90">
+                {agentTranscript}
+                <span className="ml-1 inline-block h-2 w-0.5 bg-accent-text animate-pulse" />
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
-              <div ref={bottomRef} />
-            </>
-          )}
-        </div>
-      )}
+      {/* Action Buttons */}
+      <div className="shrink-0 flex items-center gap-[6px] pl-[14px] border-l border-border/50">
+        <Button variant="tool" onClick={onNewChat} title="New Chat">
+          <Plus className="h-[14px] w-[14px]" />
+        </Button>
+        {sessionId && messages.length > 0 && (
+          <Button variant="tool" onClick={handleDownloadSession} title="Download Transcript">
+            <Download className="h-[14px] w-[14px]" />
+          </Button>
+        )}
+      </div>
+
     </div>
   );
 }

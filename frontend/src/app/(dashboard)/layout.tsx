@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { AvatarDebugHUD } from '@/components/debug/AvatarDebugHUD';
 
 export default function DashboardGroupLayout({ children }: { children: React.ReactNode }) {
   const isAuthed = useAuthStore((s) => s.isAuthenticated);
@@ -24,5 +25,10 @@ export default function DashboardGroupLayout({ children }: { children: React.Rea
 
   if (!isReady || !isAuthed) return null;
 
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <DashboardLayout>
+      {children}
+      <AvatarDebugHUD />
+    </DashboardLayout>
+  );
 }

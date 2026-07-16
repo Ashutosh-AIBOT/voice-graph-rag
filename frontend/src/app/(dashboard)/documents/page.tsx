@@ -100,67 +100,41 @@ export default function DocumentsPage() {
   }, [documents]);
 
   return (
-    <div className="flex h-full gap-4 p-4 overflow-hidden">
-      {/* Left side master view */}
-      <div className="flex-1 flex flex-col gap-4 overflow-y-auto scrollbar-thin pr-1">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 shrink-0">
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="mb-3 text-sm font-semibold text-text-primary">Upload Document</h2>
-              <DocumentUpload />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-md bg-bg-elevated p-3 border border-border/20">
-                  <p className="text-xl font-bold text-accent-violet">{documents.length}</p>
-                  <p className="text-xs text-text-muted font-medium">Total</p>
-                </div>
-                <div className="rounded-md bg-bg-elevated p-3 border border-border/20">
-                  <p className="text-xl font-bold text-success">{completed}</p>
-                  <p className="text-xs text-text-muted font-medium">Completed</p>
-                </div>
-                <div className="rounded-md bg-bg-elevated p-3 border border-border/20">
-                  <p className="text-xl font-bold text-warning">
-                    {documents.filter((d) => d.status === 'PROCESSING' || d.status === 'PENDING').length}
-                  </p>
-                  <p className="text-xs text-text-muted font-medium">Active</p>
-                </div>
-              </div>
-              <p className="mt-3 text-[11px] text-text-muted leading-relaxed">
-                Check boxes to select source context. Click rows to view extracted entities and relationships.
-              </p>
-            </CardContent>
-          </Card>
+    <div className="grid h-full w-full grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-[12px] p-[12px] bg-bg2 overflow-hidden">
+      {/* ── LEFT COLUMN ── */}
+      <div className="flex flex-col gap-[12px] min-h-0 overflow-hidden">
+        {/* Upload Card */}
+        <div className="shrink-0 bg-panel border border-border rounded-[14px] p-[16px] shadow-sm">
+          <DocumentUpload />
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0 bg-bg-surface rounded-lg border border-border p-4">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-border shrink-0">
-            <h2 className="text-sm font-semibold text-text-primary">Document List</h2>
-            <div className="flex items-center gap-3">
+        {/* Document List */}
+        <div className="flex-1 flex flex-col min-h-0 bg-panel border border-border rounded-[14px] p-[14px] shadow-sm">
+          <div className="flex items-center justify-between pb-[12px] mb-[8px] border-b border-border shrink-0">
+            <h2 className="text-[12.5px] font-semibold text-text">Document list</h2>
+            <div className="flex items-center gap-[12px]">
               <button
                 type="button"
                 onClick={() => useDocumentsStore.getState().selectAllDocuments()}
-                className="text-[11px] text-accent-violet hover:underline font-medium"
+                className="text-[11px] font-semibold text-accent hover:text-accent/80 transition-colors"
               >
-                Select All
+                Select all
               </button>
-              <span className="text-[11px] text-text-muted">|</span>
               <button
                 type="button"
                 onClick={() => useDocumentsStore.getState().deselectAllDocuments()}
-                className="text-[11px] text-text-muted hover:underline font-medium"
+                className="text-[11px] font-semibold text-text3 hover:text-text transition-colors"
               >
-                Deselect All
+                Deselect all
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
+          <div className="flex-1 overflow-y-auto space-y-[8px] pr-1 scrollbar-thin min-h-0">
             {documents.length === 0 ? (
-              <p className="text-sm text-text-muted py-8 text-center">No documents uploaded yet.</p>
+              <div className="h-full flex items-center justify-center">
+                <p className="text-[12px] text-text3">No documents uploaded yet.</p>
+              </div>
             ) : (
               documents.map((doc) => (
                 <DocumentRow
@@ -176,7 +150,7 @@ export default function DocumentsPage() {
             )}
             
             {notice && (
-              <div className="mt-3 p-2.5 rounded-md border border-accent-cyan/20 bg-accent-cyan/10 text-xs text-accent-cyan font-medium">
+              <div className="mt-[8px] p-[10px] rounded-[8px] border border-accent/20 bg-accent-soft text-[11px] text-accent font-medium">
                 {notice}
               </div>
             )}
@@ -184,36 +158,56 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      {/* Right side details card */}
-      <Card className="w-[380px] shrink-0 hidden lg:flex flex-col h-full overflow-hidden border border-border bg-bg-surface">
-        <CardContent className="p-4 flex flex-col h-full overflow-hidden min-h-0">
+      {/* ── RIGHT COLUMN ── */}
+      <div className="hidden lg:flex flex-col gap-[12px] min-h-0 overflow-hidden">
+        
+        {/* Stats Row */}
+        <div className="shrink-0 grid grid-cols-3 gap-[8px]">
+          <div className="bg-panel border border-border rounded-[14px] p-[12px] text-center shadow-sm">
+            <p className="font-mono text-[20px] font-bold text-accent">{documents.length}</p>
+            <p className="mt-[2px] text-[9.5px] font-semibold tracking-[0.03em] text-text3 uppercase">Total</p>
+          </div>
+          <div className="bg-panel border border-border rounded-[14px] p-[12px] text-center shadow-sm" style={{ color: 'hsl(var(--e-org))' }}>
+            <p className="font-mono text-[20px] font-bold currentColor">{completed}</p>
+            <p className="mt-[2px] text-[9.5px] font-semibold tracking-[0.03em] text-text3 uppercase">Completed</p>
+          </div>
+          <div className="bg-panel border border-border rounded-[14px] p-[12px] text-center shadow-sm" style={{ color: 'hsl(var(--e-location))' }}>
+            <p className="font-mono text-[20px] font-bold currentColor">
+              {documents.filter((d) => d.status === 'PROCESSING' || d.status === 'PENDING').length}
+            </p>
+            <p className="mt-[2px] text-[9.5px] font-semibold tracking-[0.03em] text-text3 uppercase">Active</p>
+          </div>
+        </div>
+
+        {/* Details / Empty Panel */}
+        <div className="flex-1 flex flex-col min-h-0 bg-panel border border-border rounded-[14px] p-[16px] shadow-sm">
           {selectedDetailDoc ? (
             <div className="flex flex-col h-full overflow-hidden min-h-0">
-              <div className="flex items-center justify-between pb-3 border-b border-border shrink-0">
+              <div className="flex items-center justify-between pb-[12px] border-b border-border shrink-0">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold truncate text-text-primary pr-2" title={selectedDetailDoc.name}>
+                  <h3 className="text-[13px] font-semibold truncate text-text pr-[8px]" title={selectedDetailDoc.name}>
                     {selectedDetailDoc.name}
                   </h3>
-                  <p className="text-[10px] text-text-muted font-medium mt-0.5">Extracted graph metadata</p>
+                  <p className="text-[10px] text-text3 font-medium mt-[2px]">Extracted graph metadata</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedDetailDoc(null)}
-                  className="p-1 hover:bg-bg-elevated rounded transition-colors text-text-muted hover:text-text-primary"
+                  className="p-[6px] hover:bg-panel2 rounded-[6px] transition-colors text-text3 hover:text-text"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-[14px] w-[14px]" />
                 </button>
               </div>
 
-              <div className="flex border-b border-border text-xs mt-3 shrink-0">
+              <div className="flex border-b border-border text-[11px] mt-[12px] shrink-0">
                 <button
                   type="button"
                   onClick={() => setActiveTab('entities')}
                   className={cn(
-                    'flex-1 pb-2 font-semibold border-b-2 transition-colors text-center',
+                    'flex-1 pb-[8px] font-semibold border-b-[2px] transition-colors text-center',
                     activeTab === 'entities'
-                      ? 'border-accent-violet text-accent-violet'
-                      : 'border-transparent text-text-muted hover:text-text-primary'
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-text2 hover:text-text'
                   )}
                 >
                   Entities ({docEntities.length})
@@ -222,43 +216,43 @@ export default function DocumentsPage() {
                   type="button"
                   onClick={() => setActiveTab('relations')}
                   className={cn(
-                    'flex-1 pb-2 font-semibold border-b-2 transition-colors text-center',
+                    'flex-1 pb-[8px] font-semibold border-b-[2px] transition-colors text-center',
                     activeTab === 'relations'
-                      ? 'border-accent-violet text-accent-violet'
-                      : 'border-transparent text-text-muted hover:text-text-primary'
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-text2 hover:text-text'
                   )}
                 >
                   Relationships ({docLinks.length})
                 </button>
               </div>
 
-              <div className="flex-1 mt-3 overflow-hidden flex flex-col min-h-0">
+              <div className="flex-1 mt-[12px] overflow-hidden flex flex-col min-h-0">
                 {activeTab === 'entities' ? (
                   <div className="flex flex-col h-full min-h-0">
-                    <div className="relative mb-2 shrink-0">
-                      <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-text-muted" />
+                    <div className="relative mb-[8px] shrink-0">
+                      <Search className="absolute left-[10px] top-1/2 -translate-y-1/2 h-[12px] w-[12px] text-text3" />
                       <input
                         type="text"
                         placeholder="Search entities..."
                         value={entityQuery}
                         onChange={(e) => setEntityQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/65"
+                        className="w-full pl-[28px] pr-[12px] py-[6px] text-[11.5px] rounded-[8px] border border-border bg-panel2 focus:outline-none focus:border-accent text-text placeholder:text-text3 transition-colors"
                       />
                     </div>
-                    <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
+                    <div className="flex-1 overflow-y-auto space-y-[6px] pr-1 scrollbar-thin min-h-0">
                       {filteredEntities.length === 0 ? (
-                        <p className="text-xs text-text-muted text-center py-6">No matching entities found.</p>
+                        <p className="text-[11px] text-text3 text-center py-6">No matching entities found.</p>
                       ) : (
                         filteredEntities.map((ent, i) => (
-                          <div key={i} className="p-2.5 rounded bg-bg-elevated border border-border/40 text-xs">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="font-semibold text-text-primary truncate">{ent.name}</span>
-                              <span className="px-1.5 py-0.5 rounded-full bg-accent-violet/15 text-accent-violet text-[9px] uppercase font-bold shrink-0">
+                          <div key={i} className="p-[10px] rounded-[8px] bg-panel2 border border-border/50 text-[11.5px]">
+                            <div className="flex items-center justify-between gap-2 mb-[4px]">
+                              <span className="font-semibold text-text truncate">{ent.name}</span>
+                              <span className="px-[6px] py-[2px] rounded-full bg-accent-soft text-accent text-[9px] uppercase font-bold shrink-0">
                                 {ent.type}
                               </span>
                             </div>
                             {ent.description && (
-                              <p className="text-text-muted text-[11px] leading-relaxed mt-1 font-normal">{ent.description}</p>
+                              <p className="text-text2 text-[10.5px] leading-[1.5] mt-[2px]">{ent.description}</p>
                             )}
                           </div>
                         ))
@@ -267,34 +261,34 @@ export default function DocumentsPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col h-full min-h-0">
-                    <div className="relative mb-2 shrink-0">
-                      <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-text-muted" />
+                    <div className="relative mb-[8px] shrink-0">
+                      <Search className="absolute left-[10px] top-1/2 -translate-y-1/2 h-[12px] w-[12px] text-text3" />
                       <input
                         type="text"
                         placeholder="Search relationships..."
                         value={relationQuery}
                         onChange={(e) => setRelationQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/65"
+                        className="w-full pl-[28px] pr-[12px] py-[6px] text-[11.5px] rounded-[8px] border border-border bg-panel2 focus:outline-none focus:border-accent text-text placeholder:text-text3 transition-colors"
                       />
                     </div>
-                    <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
+                    <div className="flex-1 overflow-y-auto space-y-[6px] pr-1 scrollbar-thin min-h-0">
                       {filteredLinks.length === 0 ? (
-                        <p className="text-xs text-text-muted text-center py-6">No matching relationships found.</p>
+                        <p className="text-[11px] text-text3 text-center py-6">No matching relationships found.</p>
                       ) : (
                         filteredLinks.map((link, i) => (
-                          <div key={i} className="p-2.5 rounded bg-bg-elevated border border-border/40 text-xs space-y-1">
-                            <div className="flex flex-wrap items-center gap-1.5 text-[11px] leading-relaxed">
-                              <span className="font-semibold text-text-primary">{link.source}</span>
-                              <span className="px-1.5 py-0.5 rounded bg-accent-cyan/15 text-accent-cyan text-[9px] font-bold shrink-0">
+                          <div key={i} className="p-[10px] rounded-[8px] bg-panel2 border border-border/50 text-[11px] space-y-[4px]">
+                            <div className="flex flex-wrap items-center gap-[6px] leading-[1.5]">
+                              <span className="font-semibold text-text">{link.source}</span>
+                              <span className="px-[6px] py-[2px] rounded-[4px] bg-[hsl(var(--e-tech)/0.15)] text-[hsl(var(--e-tech))] text-[9px] font-bold shrink-0">
                                 {link.type}
                               </span>
-                              <span className="font-semibold text-text-primary">{link.target}</span>
+                              <span className="font-semibold text-text">{link.target}</span>
                             </div>
                             {link.description && (
-                              <p className="text-text-muted text-[11px] leading-relaxed mt-1 font-normal">{link.description}</p>
+                              <p className="text-text2 text-[10.5px] leading-[1.5] mt-[2px]">{link.description}</p>
                             )}
                             {link.confidence !== undefined && (
-                              <p className="text-[10px] text-text-muted/75 font-medium mt-1">Confidence: {link.confidence.toFixed(2)}</p>
+                              <p className="text-[9.5px] text-text3 font-medium mt-[2px]">Confidence: {link.confidence.toFixed(2)}</p>
                             )}
                           </div>
                         ))
@@ -305,18 +299,18 @@ export default function DocumentsPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-accent-violet/10 flex items-center justify-center text-accent-violet mb-3 shrink-0">
-                <Layers className="h-5 w-5" />
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="h-[46px] w-[46px] rounded-full bg-accent-soft flex items-center justify-center mb-[16px] shrink-0">
+                <Layers className="h-[20px] w-[20px] text-accent" />
               </div>
-              <h4 className="text-xs font-semibold text-text-primary mb-1">No Document Selected</h4>
-              <p className="text-[11px] text-text-muted max-w-[220px] leading-relaxed">
+              <h4 className="text-[12.5px] font-semibold text-text mb-[4px]">No Document Selected</h4>
+              <p className="text-[11px] text-text3 max-w-[180px] leading-[1.5]">
                 Click a completed document card on the left to explore its extracted entities and relationships.
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

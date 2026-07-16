@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Volume2, Wifi, WifiOff, Loader2, Square } from 'lucide-react';
+import { Mic, MicOff, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type AgentState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
@@ -16,51 +15,14 @@ interface VoiceControlsProps {
   selectedDocsCount: number;
 }
 
-const stateConfig: Record<AgentState, { label: string; color: string; pulse: boolean }> = {
-  idle:       { label: 'Ready',      color: 'text-text-muted',    pulse: false },
-  connecting: { label: 'Connecting…', color: 'text-warning',      pulse: true },
-  listening:  { label: 'Listening',  color: 'text-accent-cyan',   pulse: true },
-  thinking:   { label: 'Thinking…',  color: 'text-accent-violet', pulse: true },
-  speaking:   { label: 'Speaking',   color: 'text-success',       pulse: true },
-  error:      { label: 'Error',      color: 'text-error',         pulse: false },
+const stateLabels: Record<AgentState, string> = {
+  idle: 'Ready to Connect',
+  connecting: 'Connecting...',
+  listening: 'Listening...',
+  thinking: 'Thinking...',
+  speaking: 'Speaking...',
+  error: 'Error',
 };
-
-/** Animated waveform bars that react to agent state */
-function WaveformBars({ state }: { state: AgentState }) {
-  const bars = 7;
-  const active = state === 'listening' || state === 'speaking';
-  return (
-    <div className="flex items-center gap-[3px] h-8">
-      {Array.from({ length: bars }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            'w-1 rounded-full transition-all',
-            active ? 'bg-accent-cyan' : 'bg-border',
-            state === 'thinking' && 'bg-accent-violet'
-          )}
-          style={{
-            height: active
-              ? `${20 + Math.abs(Math.sin(i * 0.9)) * 12}px`
-              : '6px',
-            animationName: active ? 'waveBar' : 'none',
-            animationDuration: active ? `${0.4 + i * 0.08}s` : '0s',
-            animationTimingFunction: 'ease-in-out',
-            animationIterationCount: 'infinite',
-            animationDirection: 'alternate',
-            animationDelay: `${i * 0.06}s`,
-          }}
-        />
-      ))}
-      <style jsx>{`
-        @keyframes waveBar {
-          from { height: 6px; }
-          to   { height: 32px; }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 export function VoiceControls({
   agentState,
@@ -71,98 +33,65 @@ export function VoiceControls({
   onDisconnect,
   selectedDocsCount,
 }: VoiceControlsProps) {
-  const cfg = stateConfig[agentState];
+  const isRecording = agentState === 'listening' || agentState === 'speaking' || agentState === 'thinking';
+  const label = stateLabels[agentState];
 
   return (
-    <div className={cn(
-      'flex items-center justify-between gap-4 rounded-xl border border-border/60 p-3',
-      'bg-bg-surface/80 backdrop-blur-sm'
-    )}>
-      {/* Connection status */}
-      <div className="flex items-center gap-2 min-w-0">
-        {isConnected ? (
-          <Wifi className="h-3.5 w-3.5 shrink-0 text-success" />
-        ) : (
-          <WifiOff className="h-3.5 w-3.5 shrink-0 text-text-muted" />
-        )}
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-text-primary truncate">
-            {isConnected
-              ? `Connected to ${selectedDocsCount} doc(s)`
-              : `${selectedDocsCount} doc(s) selected`}
-          </p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            {cfg.pulse && (
-              <span className={cn('h-1.5 w-1.5 rounded-full animate-pulse shrink-0', {
-                'bg-accent-cyan':   agentState === 'listening',
-                'bg-accent-violet': agentState === 'thinking' || agentState === 'connecting',
-                'bg-success':       agentState === 'speaking',
-                'bg-warning':       agentState === 'connecting',
-              })} />
-            )}
-            <span className={cn('text-[10px] font-medium', cfg.color)}>{cfg.label}</span>
-          </div>
-        </div>
+    <div className="flex items-center justify-between rounded-[12px] border border-border bg-panel px-[14px] py-[12px]">
+      
+      {/* Left: Status Text */}
+      <div className="flex flex-col">
+        <span className="text-[11.5px] font-bold text-text">
+          {isConnected ? 'Voice AI Session Active' : 'Start Voice AI'}
+        </span>
+        <span className="text-[10px] text-text3 mt-[1px]">
+          {selectedDocsCount > 0 
+            ? `Grounded in ${selectedDocsCount} document(s)` 
+            : 'Select documents to ground the AI'}
+        </span>
       </div>
 
-      {/* Waveform */}
-      <WaveformBars state={agentState} />
+      {/* Center: Mic Button */}
+      <div className="flex items-center justify-center relative">
+        <button
+          onClick={isConnected ? (isMuted ? onToggleMute : onToggleMute) : onConnect}
+          disabled={agentState === 'connecting' || (!isConnected && selectedDocsCount === 0)}
+          className={cn(
+            'flex h-[38px] w-[38px] items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 z-10',
+            isConnected 
+              ? (isMuted ? 'bg-panel2 border border-border text-text3 hover:text-text hover:border-accent' : 'bg-accent text-accent-text')
+              : 'bg-accent text-accent-text disabled:opacity-50 disabled:cursor-not-allowed',
+            !isMuted && isRecording && 'animate-mic-pulse'
+          )}
+        >
+          {isConnected && isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        </button>
+      </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Mute button */}
-        {isConnected && (
-          <button
-            onClick={onToggleMute}
-            title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
-            className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-full border transition-all',
-              isMuted
-                ? 'border-error/40 bg-error/10 text-error hover:bg-error/20'
-                : 'border-border/60 bg-bg-elevated text-text-secondary hover:border-accent-cyan/40 hover:text-accent-cyan'
-            )}
-          >
-            {isMuted ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
-          </button>
-        )}
-
-        {/* Connect / Disconnect button */}
+      {/* Right: State Badge & End Button */}
+      <div className="flex flex-col items-end gap-2">
         {isConnected ? (
-          <button
-            onClick={onDisconnect}
-            title="End session"
-            className={cn(
-              'flex h-8 items-center gap-1.5 rounded-full border border-error/30',
-              'bg-error/10 px-3 text-[11px] font-semibold text-error',
-              'hover:bg-error/20 transition-colors'
-            )}
-          >
-            <Square className="h-3 w-3 fill-current" />
-            End
-          </button>
+          <>
+            <div className="flex items-center gap-2">
+              <span className="rounded-[20px] bg-accent px-[11px] py-[4px] text-[10px] font-semibold text-accent-text">
+                {label}
+              </span>
+              <button 
+                onClick={onDisconnect}
+                className="flex h-[24px] items-center gap-1 rounded-[6px] bg-panel2 border border-border px-2 text-[10px] font-semibold text-text2 hover:text-text hover:border-accent transition-colors"
+              >
+                <Square className="h-3 w-3 fill-current" />
+                End
+              </button>
+            </div>
+          </>
         ) : (
-          <button
-            data-testid="connect-rag-button"
-            onClick={onConnect}
-            disabled={agentState === 'connecting'}
-            title={'Start voice session'}
-            className={cn(
-              'flex h-8 items-center gap-1.5 rounded-full px-4 text-[11px] font-semibold text-white',
-              'transition-all active:scale-95',
-              agentState !== 'connecting'
-                ? 'bg-gradient-to-r from-accent-violet to-accent-cyan shadow-lg shadow-accent-violet/20 hover:opacity-90'
-                : 'bg-bg-elevated text-text-muted cursor-not-allowed border border-border'
-            )}
-          >
-            {agentState === 'connecting' ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Mic className="h-3.5 w-3.5" />
-            )}
-            {agentState === 'connecting' ? 'Connecting…' : 'Start'}
-          </button>
+          <span className="rounded-[20px] bg-panel2 border border-border px-[11px] py-[4px] text-[10px] font-semibold text-text2">
+            Disconnected
+          </span>
         )}
       </div>
+      
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { GraphControls } from './GraphControls';
 import { GraphLegend } from './GraphLegend';
 import { GraphSearch } from './GraphSearch';
 import { useRef as _useRef } from 'react';
+import { useMemorySystem } from '@/state/memorySystem';
 
 const ForceGraph2D = dynamic(() => import('./ForceGraphWrapper'), { ssr: false }) as any;
 
@@ -38,6 +39,9 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
   const dim = useGraphStore((s) => s.dim);
   const activeAnimatingNode = useGraphStore((s) => s.activeAnimatingNode);
   const ragHighlightedIds = useGraphStore((s) => s.ragHighlightedIds);
+  
+  const visitedNodeIds = useMemorySystem((s) => s.snapshot?.visitedNodeIds || []);
+  const visitedSet = useMemo(() => new Set(visitedNodeIds), [visitedNodeIds]);
 
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -208,6 +212,18 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
       ctx.lineWidth = 2.5;
       ctx.stroke();
     }
+    
+    // ── Phase 20: Visited memory marker ─────────────────────────────────────
+    if (visitedSet.has(n.id) && !isRagActive && !isRagHighlighted && !isHighlighted && !isSearch && !isHovered) {
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.arc(x, y, r + 3, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
 
     // Node fill with radial gradient for depth
     const gradient = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
@@ -247,7 +263,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
     }
 
     ctx.restore();
-  }, [highlightSet, pathSet, searchHit, hoverNode, isDimmed, activeAnimatingNode, ragHighlightedIds]);
+  }, [highlightSet, pathSet, searchHit, hoverNode, isDimmed, activeAnimatingNode, ragHighlightedIds, visitedSet]);
 
   const nodePointerAreaPaint = useCallback((node: any, color: string, ctx: CanvasRenderingContext2D) => {
     const n = node as FGNode;
@@ -283,7 +299,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
         }}
         nodeOpacity={(n: any) => (isDimmed(n as FGNode) ? 0.18 : 1)}
         linkColor={(l: any) =>
-          isPathEdge(l as FGLink) ? 'hsl(188, 94%, 52%)' : 'rgba(148,163,184,0.35)'
+          isPathEdge(l as FGLink) ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.15)'
         }
         linkWidth={(l: any) => {
           if (isPathEdge(l as FGLink)) return 3;
@@ -316,7 +332,7 @@ export function GraphVisualization({ height = '100%', hideControls = false }: { 
         linkDirectionalParticleSpeed={0.008}
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
-        linkDirectionalArrowColor={(l: any) => isPathEdge(l as FGLink) ? 'hsl(188,94%,52%)' : 'rgba(148,163,184,0.5)'}
+        linkDirectionalArrowColor={(l: any) => isPathEdge(l as FGLink) ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)'}
         onNodeClick={(n: any) => {
           closeContextMenu();
           selectEntity(n as GraphNode);

@@ -3,24 +3,26 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-[6px] whitespace-nowrap rounded-[8px] text-[12px] font-semibold transition-all duration-150 ease-out focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-accent-violet text-white hover:bg-accent-violet/90',
-        secondary: 'bg-bg-elevated text-text-primary hover:bg-bg-elevated/70 border border-border',
-        outline: 'border border-border bg-transparent hover:bg-bg-elevated',
-        ghost: 'hover:bg-bg-elevated',
-        cyan: 'bg-accent-cyan text-white hover:bg-accent-cyan/90',
+        default: 'bg-panel2 text-text border border-border hover:border-accent',
+        accent: 'bg-accent text-accent-text border-none hover:brightness-[1.08] hover:-translate-y-[1px]',
+        ghost: 'bg-panel2 text-text2 border border-border hover:text-text hover:border-accent',
+        tool: 'h-[28px] w-[28px] rounded-[8px] bg-panel border border-border text-text2 hover:border-accent hover:text-accent p-0',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-8 px-3 text-xs',
-        lg: 'h-11 px-6',
-        icon: 'h-9 w-9',
+        default: 'px-[14px] py-[8px]',
+        sm: 'px-[10px] py-[6px] text-[11px]',
+        icon: 'h-[28px] w-[28px] p-0',
+        none: '',
       },
     },
-    defaultVariants: { variant: 'default', size: 'default' },
+    defaultVariants: { 
+      variant: 'default', 
+      size: 'default' 
+    },
   }
 );
 
@@ -29,8 +31,16 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => (
-    <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
-  )
+  ({ className, variant, size, ...props }, ref) => {
+    // If tool variant is selected, force size none so it uses tool's fixed dimensions
+    const finalSize = variant === 'tool' ? 'none' : size;
+    return (
+      <button 
+        ref={ref} 
+        className={cn(buttonVariants({ variant, size: finalSize }), className)} 
+        {...props} 
+      />
+    );
+  }
 );
 Button.displayName = 'Button';
