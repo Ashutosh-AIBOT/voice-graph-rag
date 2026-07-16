@@ -37,7 +37,7 @@ export function SourceFilter() {
         return (
           <span
             key={src}
-            className="inline-flex items-center gap-1 rounded-full border border-accent-indigo/40 bg-accent-indigo/10 px-2.5 py-1 text-xs font-medium text-accent-indigo"
+            className="inline-flex items-center gap-1 rounded-full border border-accent-secondary/40 bg-accent-secondary/10 px-2.5 py-1 text-xs font-medium text-accent-secondary"
           >
             {src}
             {count > 0 && <span className="text-[10px] opacity-70">({count})</span>}

@@ -39,7 +39,7 @@ export function MultiDocSelector() {
                 deselectAll();
               }
             }}
-            className="text-[10px] font-semibold text-accent-violet hover:underline"
+            className="text-[10px] font-semibold text-accent-primary hover:underline"
           >
             {selectedIds.length === 0 ? "Select All" : "Clear All"}
           </button>
@@ -54,7 +54,7 @@ export function MultiDocSelector() {
           placeholder="Search documents..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-8 pr-3 py-1 text-[11px] rounded border border-border/60 bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/60"
+          className="w-full pl-8 pr-3 py-1 text-[11px] rounded border border-border/60 bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-primary text-text-primary placeholder:text-text-muted/60"
         />
       </div>
 
@@ -73,7 +73,7 @@ export function MultiDocSelector() {
                 className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-bg-elevated cursor-pointer transition-colors"
               >
                 {checked ? (
-                  <CheckSquare className="h-4 w-4 shrink-0 text-accent-violet" />
+                  <CheckSquare className="h-4 w-4 shrink-0 text-accent-primary" />
                 ) : (
                   <Square className="h-4 w-4 shrink-0 text-text-muted" />
                 )}

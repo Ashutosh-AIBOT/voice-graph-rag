@@ -55,7 +55,7 @@ export function PathView({
       <div
         className={cn(
           'flex flex-wrap items-stretch gap-1.5 overflow-x-auto rounded-md border border-border bg-bg-base p-3 scrollbar-thin',
-          index !== undefined && 'border-accent-indigo/30 bg-accent-indigo/5'
+          index !== undefined && 'border-accent-secondary/30 bg-accent-secondary/5'
         )}
       >
         {chain.map((hop, i) => (
@@ -71,8 +71,8 @@ export function PathView({
               </span>
             </div>
             {i === chain.length - 1 && (
-              <div className="flex flex-col items-center rounded-md bg-accent-violet/10 px-3 py-2">
-                <span className="text-sm font-semibold text-accent-violet">{hop.to}</span>
+              <div className="flex flex-col items-center rounded-md bg-accent-primary/10 px-3 py-2">
+                <span className="text-sm font-semibold text-accent-primary">{hop.to}</span>
               </div>
             )}
           </div>
@@ -105,7 +105,7 @@ export function PathView({
         <div className="flex items-center gap-2 rounded-md bg-bg-elevated px-3 py-2">
           <span className="text-sm font-medium text-text-primary">{entityA}</span>
           <ArrowRight className="h-4 w-4 text-text-muted" />
-          <span className="text-sm font-medium text-accent-violet">{entityB}</span>
+          <span className="text-sm font-medium text-accent-primary">{entityB}</span>
         </div>
       )}
 
@@ -130,7 +130,7 @@ export function PathView({
                   <span className="rounded-md bg-accent-cyan/10 px-2 py-0.5 text-[10px] font-medium uppercase text-accent-cyan">
                     {hop.rel.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-sm font-semibold text-accent-violet">{hop.to}</span>
+                  <span className="text-sm font-semibold text-accent-primary">{hop.to}</span>
                 </div>
                 {hop.doc && (
                   <p className="mt-1 text-[10px] text-text-muted">Source: {hop.doc}</p>
@@ -163,7 +163,7 @@ export function PathView({
                 className={cn(
                   'px-3 py-1.5 text-xs font-medium border-b-2 transition-colors',
                   activeTab === i + 1
-                    ? 'border-accent-indigo text-accent-indigo'
+                    ? 'border-accent-secondary text-accent-secondary'
                     : 'border-transparent text-text-muted hover:text-text-primary'
                 )}
               >

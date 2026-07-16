@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Play, Terminal, Copy, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 
 interface CypherResult {
@@ -57,7 +58,7 @@ export function CypherEditor() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="MATCH (n:Entity) RETURN n.name, n.type LIMIT 10"
-          className="h-40 w-full resize-none rounded-md border border-border bg-bg-base p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none"
+          className="h-40 w-full resize-none rounded-lg border border-border bg-bg-base p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none focus:ring-2 focus:ring-accent-cyan/20"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
               e.preventDefault();
@@ -66,14 +67,14 @@ export function CypherEditor() {
           }}
         />
         <div className="mt-2 flex items-center gap-2">
-          <button
+          <Button
             onClick={runQuery}
             disabled={loading || !query.trim()}
-            className="inline-flex items-center gap-1.5 rounded-md bg-accent-cyan px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-cyan/90 disabled:opacity-50"
+            size="sm"
           >
             <Play className="h-3.5 w-3.5" /> {loading ? 'Running...' : 'Run Query'}
-          </button>
-          <span className="text-[10px] text-text-muted">Ctrl+Enter to run</span>
+          </Button>
+          <span className="text-[11px] text-text-muted">Ctrl+Enter to run</span>
         </div>
       </div>
 
@@ -84,15 +85,16 @@ export function CypherEditor() {
               <>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-success">Generated Cypher</p>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={copyCypher}
-                    className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
                   >
                     {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {copied ? 'Copied' : 'Copy'}
-                  </button>
+                  </Button>
                 </div>
-                <pre className="overflow-x-auto rounded-md bg-bg-base p-3 font-mono text-xs text-accent-cyan">
+                <pre className="overflow-x-auto rounded-lg bg-bg-elevated p-3 font-mono text-xs text-accent-cyan">
                   {result.cypher}
                 </pre>
                 {result.explanation && (

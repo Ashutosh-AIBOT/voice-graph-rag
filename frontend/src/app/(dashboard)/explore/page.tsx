@@ -23,7 +23,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Filter bars */}
-      <div className="space-y-2 border-t border-border bg-bg-surface p-3">
+      <div className="space-y-2 border-t border-border bg-bg-base p-3">
         <SourceFilter />
         <GraphFilter />
       </div>

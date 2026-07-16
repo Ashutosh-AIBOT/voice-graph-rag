@@ -1,20 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import { useAuthReady } from '@/hooks/useAuthReady';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function DashboardGroupLayout({ children }: { children: React.ReactNode }) {
   const isAuthed = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // Wait for Zustand persisted state to rehydrate (50ms)
-    const timer = setTimeout(() => setIsReady(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
+  const isReady = useAuthReady();
 
   useEffect(() => {
     if (isReady && !isAuthed) {

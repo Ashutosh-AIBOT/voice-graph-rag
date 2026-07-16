@@ -7,6 +7,8 @@ import { EntityPanel } from '@/components/entities/EntityPanel';
 import { GraphVisualization } from '@/components/graph/GraphVisualization';
 import { QueryTemplates } from '@/components/multihop/QueryTemplates';
 import { PathView } from '@/components/multihop/PathView';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Search, Loader2, AlertCircle, ArrowRight, Network, Zap
 } from 'lucide-react';
@@ -214,13 +216,13 @@ export default function MultiHopPage() {
   return (
     <div className="flex h-full flex-col lg:flex-row bg-bg-base overflow-hidden">
       {/* ── LEFT PANEL ── */}
-      <div className="flex w-full shrink-0 flex-col border-b border-border lg:w-[400px] xl:w-[460px] lg:min-w-[400px] lg:h-full lg:border-b-0 lg:border-r overflow-hidden bg-bg-surface/30">
+      <div className="flex w-full shrink-0 flex-col border-b border-border lg:w-[400px] xl:w-[460px] lg:min-w-[400px] lg:h-full lg:border-b-0 lg:border-r overflow-hidden bg-bg-base">
         <div className="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-thin">
           
           {/* Header */}
           <div className="flex items-center gap-2">
             <Network className="h-5 w-5 text-accent-cyan" />
-            <h1 className="text-lg font-semibold text-text-primary">Multi-Hop Reasoning</h1>
+            <h1 className="text-base font-semibold text-text-primary">Multi-Hop Reasoning</h1>
           </div>
           <p className="text-xs text-text-muted leading-relaxed">
             Find how entities are connected through chains of relationships in the knowledge graph.
@@ -231,14 +233,14 @@ export default function MultiHopPage() {
           <QueryTemplates onSelect={handleTemplateSelect} />
 
           {/* Query Input Card */}
-          <div className="space-y-3 rounded-xl border border-border/80 bg-bg-surface/75 p-4 shadow-sm backdrop-blur-sm">
+          <div className="space-y-3 rounded-xl border border-border bg-bg-surface p-4 shadow-sm">
             {/* Mode toggle */}
-            <div className="flex items-center gap-1 rounded-lg bg-bg-base p-0.5 border border-border/40">
+            <div className="flex items-center gap-1 rounded-lg bg-bg-elevated p-0.5">
               <button
                 onClick={() => setUseExplicit(false)}
                 className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
                   !useExplicit
-                    ? 'bg-accent-cyan text-white shadow-sm font-semibold'
+                    ? 'bg-accent-cyan text-white shadow-sm'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -248,7 +250,7 @@ export default function MultiHopPage() {
                 onClick={() => setUseExplicit(true)}
                 className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
                   useExplicit
-                    ? 'bg-accent-cyan text-white shadow-sm font-semibold'
+                    ? 'bg-accent-cyan text-white shadow-sm'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -259,47 +261,46 @@ export default function MultiHopPage() {
             {!useExplicit ? (
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                <input
+                <Input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !loading && runQuery()}
                   placeholder="e.g. Who manages the team that built the payment system?"
-                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2.5 pl-9 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none focus:ring-1 focus:ring-accent-cyan/30 transition-all"
+                  className="pl-9"
                   disabled={loading}
                 />
               </div>
             ) : (
               <div className="space-y-2">
-                <input
+                <Input
                   type="text"
                   value={entityA}
                   onChange={(e) => setEntityA(e.target.value)}
                   placeholder="From entity (e.g. Sarah Chen)"
-                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none focus:ring-1 focus:ring-accent-cyan/30 transition-all"
                   disabled={loading}
                 />
                 <div className="flex items-center justify-center gap-2 py-0.5">
-                  <div className="h-px flex-1 bg-border/60" />
+                  <div className="h-px flex-1 bg-border" />
                   <ArrowRight className="h-4 w-4 text-text-muted" />
-                  <div className="h-px flex-1 bg-border/60" />
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-                <input
+                <Input
                   type="text"
                   value={entityB}
                   onChange={(e) => setEntityB(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !loading && runQuery()}
                   placeholder="To entity (e.g. Acme Corporation)"
-                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-cyan focus:outline-none focus:ring-1 focus:ring-accent-cyan/30 transition-all"
                   disabled={loading}
                 />
               </div>
             )}
 
-            <button
+            <Button
               onClick={runQuery}
               disabled={loading || (!query.trim() && !(entityA.trim() && entityB.trim()))}
-              className="w-full rounded-lg bg-accent-cyan py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-accent-cyan/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full"
+              size="lg"
             >
               {loading ? (
                 <>
@@ -312,12 +313,12 @@ export default function MultiHopPage() {
                   Find Connection
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           {/* ── ERROR ── */}
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               {error}
             </div>
@@ -325,8 +326,8 @@ export default function MultiHopPage() {
 
           {/* ── NO PATH FOUND ── */}
           {result && !result.found && (
-            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm">
-              <p className="font-semibold text-yellow-400">No connection found</p>
+            <div className="rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm">
+              <p className="font-semibold text-warning">No connection found</p>
               <p className="mt-1 text-text-muted leading-relaxed">{result.explanation}</p>
             </div>
           )}

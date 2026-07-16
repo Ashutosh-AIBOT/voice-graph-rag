@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { useHistoryStore } from './history';
 import { useDocumentsStore } from './documents';
 
@@ -18,6 +18,22 @@ interface AuthState {
   setTokens: (access: string, refresh?: string) => void;
   logout: () => void;
 }
+
+// Custom storage that only works client-side
+const clientStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -48,6 +64,9 @@ export const useAuthStore = create<AuthState>()(
         });
       },
     }),
-    { name: 'graphrag-auth' }
+    { 
+      name: 'graphrag-auth',
+      storage: createJSONStorage(() => clientStorage),
+    }
   )
 );

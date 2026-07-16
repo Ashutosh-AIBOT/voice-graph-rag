@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type DocStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
@@ -30,6 +30,21 @@ interface DocumentsState {
   deselectAllDocuments: () => void;
   clear: () => void;
 }
+
+const clientStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(name);
+  },
+};
 
 export const useDocumentsStore = create<DocumentsState>()(
   persist(
@@ -71,6 +86,7 @@ export const useDocumentsStore = create<DocumentsState>()(
     {
       name: 'graphrag-selected-documents',
       partialize: (state) => ({ selectedDocumentIds: state.selectedDocumentIds }),
+      storage: createJSONStorage(() => clientStorage),
     }
   )
 );

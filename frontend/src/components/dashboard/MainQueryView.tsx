@@ -10,6 +10,7 @@ import { SourceToggle } from '@/components/query/SourceToggle';
 import { QueryHistory } from '@/components/query/QueryHistory';
 import { EntityPanel } from '@/components/entities/EntityPanel';
 import { GraphVisualization } from '@/components/graph/GraphVisualization';
+import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/axios';
@@ -194,13 +195,14 @@ export function MainQueryView() {
       <div className="flex w-full flex-col border-b border-border lg:w-2/5 lg:border-b-0 lg:border-r">
         {/* New Chat button */}
         <div className="flex items-center justify-end border-b border-border px-4 py-2">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleNewChat}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-bg-surface hover:text-text-primary transition-colors"
           >
             <PlusCircle className="h-3.5 w-3.5" />
             New Chat
-          </button>
+          </Button>
         </div>
 
         <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-thin">
@@ -231,17 +233,16 @@ export function MainQueryView() {
           )}
 
           {empty && !loading && (
-            <div className="rounded-md border border-dashed border-border bg-bg-surface p-6 text-center">
-              <Sparkles className="mx-auto mb-2 h-6 w-6 text-accent-cyan" />
+            <div className="rounded-xl border border-dashed border-border bg-bg-surface p-8 text-center">
+              <Sparkles className="mx-auto mb-3 h-8 w-8 text-accent-cyan" />
               <p className="text-sm font-medium text-text-primary">Your graph is empty</p>
-              <p className="mt-1 text-xs text-text-muted">
+              <p className="mt-1.5 text-xs text-text-muted">
                 Upload documents to build your knowledge graph.
               </p>
-              <Link
-                href="/documents"
-                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-accent-violet px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-violet/90"
-              >
-                <Upload className="h-3.5 w-3.5" /> Upload Document
+              <Link href="/documents" className="mt-4 inline-block">
+                <Button size="sm">
+                  <Upload className="h-3.5 w-3.5" /> Upload Document
+                </Button>
               </Link>
             </div>
           )}

@@ -8,6 +8,8 @@ import { useGraphStore } from '@/store/graph';
 import { DocumentUpload } from '@/components/documents/DocumentUpload';
 import { DocumentRow } from '@/components/documents/DocumentRow';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Search, X, Layers, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGraphData } from '@/hooks/useGraphData';
@@ -115,7 +117,7 @@ export default function DocumentsPage() {
             <CardContent className="p-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-md bg-bg-elevated p-3 border border-border/20">
-                  <p className="text-xl font-bold text-accent-violet">{documents.length}</p>
+                  <p className="text-xl font-bold text-accent-primary">{documents.length}</p>
                   <p className="text-xs text-text-muted font-medium">Total</p>
                 </div>
                 <div className="rounded-md bg-bg-elevated p-3 border border-border/20">
@@ -139,22 +141,21 @@ export default function DocumentsPage() {
         <div className="flex-1 flex flex-col min-h-0 bg-bg-surface rounded-lg border border-border p-4">
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-border shrink-0">
             <h2 className="text-sm font-semibold text-text-primary">Document List</h2>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => useDocumentsStore.getState().selectAllDocuments()}
-                className="text-[11px] text-accent-violet hover:underline font-medium"
               >
                 Select All
-              </button>
-              <span className="text-[11px] text-text-muted">|</span>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => useDocumentsStore.getState().deselectAllDocuments()}
-                className="text-[11px] text-text-muted hover:underline font-medium"
               >
                 Deselect All
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -212,7 +213,7 @@ export default function DocumentsPage() {
                   className={cn(
                     'flex-1 pb-2 font-semibold border-b-2 transition-colors text-center',
                     activeTab === 'entities'
-                      ? 'border-accent-violet text-accent-violet'
+                      ? 'border-accent-primary text-accent-primary'
                       : 'border-transparent text-text-muted hover:text-text-primary'
                   )}
                 >
@@ -224,7 +225,7 @@ export default function DocumentsPage() {
                   className={cn(
                     'flex-1 pb-2 font-semibold border-b-2 transition-colors text-center',
                     activeTab === 'relations'
-                      ? 'border-accent-violet text-accent-violet'
+                      ? 'border-accent-primary text-accent-primary'
                       : 'border-transparent text-text-muted hover:text-text-primary'
                   )}
                 >
@@ -237,12 +238,12 @@ export default function DocumentsPage() {
                   <div className="flex flex-col h-full min-h-0">
                     <div className="relative mb-2 shrink-0">
                       <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-text-muted" />
-                      <input
+                      <Input
                         type="text"
                         placeholder="Search entities..."
                         value={entityQuery}
                         onChange={(e) => setEntityQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/65"
+                        className="h-8 pl-8 text-xs"
                       />
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
@@ -253,7 +254,7 @@ export default function DocumentsPage() {
                           <div key={i} className="p-2.5 rounded bg-bg-elevated border border-border/40 text-xs">
                             <div className="flex items-center justify-between gap-2 mb-1">
                               <span className="font-semibold text-text-primary truncate">{ent.name}</span>
-                              <span className="px-1.5 py-0.5 rounded-full bg-accent-violet/15 text-accent-violet text-[9px] uppercase font-bold shrink-0">
+                              <span className="px-1.5 py-0.5 rounded-full bg-accent-primary/15 text-accent-primary text-[9px] uppercase font-bold shrink-0">
                                 {ent.type}
                               </span>
                             </div>
@@ -269,12 +270,12 @@ export default function DocumentsPage() {
                   <div className="flex flex-col h-full min-h-0">
                     <div className="relative mb-2 shrink-0">
                       <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-text-muted" />
-                      <input
+                      <Input
                         type="text"
                         placeholder="Search relationships..."
                         value={relationQuery}
                         onChange={(e) => setRelationQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-border bg-bg-elevated focus:outline-none focus:ring-1 focus:ring-accent-violet text-text-primary placeholder:text-text-muted/65"
+                        className="h-8 pl-8 text-xs"
                       />
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
@@ -306,7 +307,7 @@ export default function DocumentsPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-accent-violet/10 flex items-center justify-center text-accent-violet mb-3 shrink-0">
+              <div className="w-12 h-12 rounded-full bg-accent-primary/10 flex items-center justify-center text-accent-primary mb-3 shrink-0">
                 <Layers className="h-5 w-5" />
               </div>
               <h4 className="text-xs font-semibold text-text-primary mb-1">No Document Selected</h4>
@@ -319,33 +320,31 @@ export default function DocumentsPage() {
       </Card>
 
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-lg border border-border bg-bg-surface p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border border-border bg-bg-panel p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 text-error mb-4">
               <AlertCircle className="h-6 w-6" />
-              <h3 className="text-lg font-bold text-text-primary">Confirm Deletion</h3>
+              <h3 className="text-base font-semibold text-text-primary">Confirm Deletion</h3>
             </div>
             <p className="text-sm text-text-secondary leading-relaxed mb-6">
               Are you sure you want to delete this document? This will remove all its nodes and relationships from the database. This action cannot be undone.
             </p>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
                 onClick={() => setDeleteConfirmId(null)}
-                className="rounded-md border border-border px-4 py-2 text-xs font-semibold text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => {
                   deleteDocument(deleteConfirmId);
                   setDeleteConfirmId(null);
                 }}
-                className="rounded-md bg-error px-4 py-2 text-xs font-semibold text-white hover:bg-error/90 transition-colors"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -20,42 +20,42 @@ const stateConfig: Record<AgentState, { label: string; color: string; pulse: boo
   idle:       { label: 'Ready',      color: 'text-text-muted',    pulse: false },
   connecting: { label: 'Connecting…', color: 'text-warning',      pulse: true },
   listening:  { label: 'Listening',  color: 'text-accent-cyan',   pulse: true },
-  thinking:   { label: 'Thinking…',  color: 'text-accent-violet', pulse: true },
+  thinking:   { label: 'Thinking…',  color: 'text-accent-primary', pulse: true },
   speaking:   { label: 'Speaking',   color: 'text-success',       pulse: true },
   error:      { label: 'Error',      color: 'text-error',         pulse: false },
 };
 
-/** Animated waveform bars that react to agent state */
+/** Animated waveform bars */
 function WaveformBars({ state }: { state: AgentState }) {
-  const bars = 7;
+  const bars = 9;
   const active = state === 'listening' || state === 'speaking';
   return (
-    <div className="flex items-center gap-[3px] h-8">
+    <div className="flex items-center gap-[2px] h-8">
       {Array.from({ length: bars }).map((_, i) => (
         <div
           key={i}
           className={cn(
-            'w-1 rounded-full transition-all',
+            'w-[3px] rounded-full transition-all duration-300',
             active ? 'bg-accent-cyan' : 'bg-border',
-            state === 'thinking' && 'bg-accent-violet'
+            state === 'thinking' && 'bg-accent-primary'
           )}
           style={{
             height: active
-              ? `${20 + Math.abs(Math.sin(i * 0.9)) * 12}px`
-              : '6px',
+              ? `${12 + Math.abs(Math.sin(i * 0.8)) * 16}px`
+              : '4px',
             animationName: active ? 'waveBar' : 'none',
-            animationDuration: active ? `${0.4 + i * 0.08}s` : '0s',
+            animationDuration: active ? `${0.35 + i * 0.06}s` : '0s',
             animationTimingFunction: 'ease-in-out',
             animationIterationCount: 'infinite',
             animationDirection: 'alternate',
-            animationDelay: `${i * 0.06}s`,
+            animationDelay: `${i * 0.05}s`,
           }}
         />
       ))}
       <style jsx>{`
         @keyframes waveBar {
-          from { height: 6px; }
-          to   { height: 32px; }
+          from { height: 4px; }
+          to   { height: 28px; }
         }
       `}</style>
     </div>
@@ -75,32 +75,36 @@ export function VoiceControls({
 
   return (
     <div className={cn(
-      'flex items-center justify-between gap-4 rounded-xl border border-border/60 p-3',
-      'bg-bg-surface/80 backdrop-blur-sm'
+      'flex items-center justify-between gap-4 rounded-2xl glass p-4',
     )}>
       {/* Connection status */}
-      <div className="flex items-center gap-2 min-w-0">
-        {isConnected ? (
-          <Wifi className="h-3.5 w-3.5 shrink-0 text-success" />
-        ) : (
-          <WifiOff className="h-3.5 w-3.5 shrink-0 text-text-muted" />
-        )}
+      <div className="flex items-center gap-3 min-w-0">
+        <div className={cn(
+          'flex h-10 w-10 items-center justify-center rounded-xl shrink-0 transition-all',
+          isConnected ? 'bg-success/10' : 'bg-bg-elevated/60'
+        )}>
+          {isConnected ? (
+            <Wifi className="h-4 w-4 text-success" />
+          ) : (
+            <WifiOff className="h-4 w-4 text-text-muted" />
+          )}
+        </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-text-primary truncate">
+          <p className="text-xs font-bold text-text-primary truncate">
             {isConnected
-              ? `Connected to ${selectedDocsCount} doc(s)`
+              ? `Connected · ${selectedDocsCount} doc(s)`
               : `${selectedDocsCount} doc(s) selected`}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             {cfg.pulse && (
               <span className={cn('h-1.5 w-1.5 rounded-full animate-pulse shrink-0', {
                 'bg-accent-cyan':   agentState === 'listening',
-                'bg-accent-violet': agentState === 'thinking' || agentState === 'connecting',
+                'bg-accent-primary': agentState === 'thinking' || agentState === 'connecting',
                 'bg-success':       agentState === 'speaking',
                 'bg-warning':       agentState === 'connecting',
               })} />
             )}
-            <span className={cn('text-[10px] font-medium', cfg.color)}>{cfg.label}</span>
+            <span className={cn('text-[10px] font-bold', cfg.color)}>{cfg.label}</span>
           </div>
         </div>
       </div>
@@ -110,31 +114,29 @@ export function VoiceControls({
 
       {/* Controls */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* Mute button */}
         {isConnected && (
           <button
             onClick={onToggleMute}
             title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
             className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-full border transition-all',
+              'flex h-9 w-9 items-center justify-center rounded-xl border transition-all',
               isMuted
                 ? 'border-error/40 bg-error/10 text-error hover:bg-error/20'
-                : 'border-border/60 bg-bg-elevated text-text-secondary hover:border-accent-cyan/40 hover:text-accent-cyan'
+                : 'border-border/60 bg-bg-elevated/60 text-text-secondary hover:border-accent-cyan/40 hover:text-accent-cyan hover:bg-accent-cyan/5'
             )}
           >
-            {isMuted ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
         )}
 
-        {/* Connect / Disconnect button */}
         {isConnected ? (
           <button
             onClick={onDisconnect}
             title="End session"
             className={cn(
-              'flex h-8 items-center gap-1.5 rounded-full border border-error/30',
-              'bg-error/10 px-3 text-[11px] font-semibold text-error',
-              'hover:bg-error/20 transition-colors'
+              'flex h-9 items-center gap-1.5 rounded-xl border border-error/30',
+              'bg-error/10 px-4 text-[11px] font-bold text-error',
+              'hover:bg-error/20 transition-all active:scale-95'
             )}
           >
             <Square className="h-3 w-3 fill-current" />
@@ -145,12 +147,12 @@ export function VoiceControls({
             data-testid="connect-rag-button"
             onClick={onConnect}
             disabled={agentState === 'connecting'}
-            title={'Start voice session'}
+            title="Start voice session"
             className={cn(
-              'flex h-8 items-center gap-1.5 rounded-full px-4 text-[11px] font-semibold text-white',
+              'flex h-9 items-center gap-1.5 rounded-xl px-5 text-[11px] font-bold text-white',
               'transition-all active:scale-95',
               agentState !== 'connecting'
-                ? 'bg-gradient-to-r from-accent-violet to-accent-cyan shadow-lg shadow-accent-violet/20 hover:opacity-90'
+                ? 'bg-gradient-to-r from-accent-primary to-accent-cyan shadow-lg shadow-accent-primary/20 hover:shadow-xl hover:opacity-90'
                 : 'bg-bg-elevated text-text-muted cursor-not-allowed border border-border'
             )}
           >

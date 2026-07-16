@@ -105,9 +105,9 @@ export function ChatHistorySidebar({
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-accent-violet" />
+            <MessageSquare className="h-4 w-4 text-accent-primary" />
             <span className="text-sm font-semibold text-text-primary">Chat History</span>
-            <span className="rounded-full bg-accent-violet/20 px-2 py-0.5 text-[10px] font-bold text-accent-violet">
+            <span className="rounded-full bg-accent-primary/20 px-2 py-0.5 text-[10px] font-bold text-accent-primary">
               {sessions.length}
             </span>
           </div>
@@ -125,8 +125,8 @@ export function ChatHistorySidebar({
             onClick={onNewChat}
             className={cn(
               'flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5',
-              'bg-gradient-to-r from-accent-violet to-accent-cyan text-white text-sm font-semibold',
-              'hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-accent-violet/20'
+              'bg-gradient-to-r from-accent-primary to-accent-cyan text-white text-sm font-semibold',
+              'hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-accent-primary/20'
             )}
           >
             <Plus className="h-4 w-4" />
@@ -146,7 +146,7 @@ export function ChatHistorySidebar({
               className={cn(
                 'w-full rounded-lg border border-border/60 bg-bg-elevated pl-8 pr-3 py-2',
                 'text-xs text-text-primary placeholder:text-text-muted/60',
-                'focus:outline-none focus:ring-1 focus:ring-accent-violet/50'
+                'focus:outline-none focus:ring-1 focus:ring-accent-primary/50'
               )}
             />
           </div>
@@ -180,7 +180,7 @@ export function ChatHistorySidebar({
                           'group relative cursor-pointer rounded-lg border px-3 py-2.5',
                           'transition-all duration-150',
                           sess.id === activeSessionId
-                            ? 'border-accent-violet/40 bg-accent-violet/10 shadow-sm'
+                            ? 'border-accent-primary/40 bg-accent-primary/10 shadow-sm'
                             : 'border-border/40 bg-bg-elevated/50 hover:border-border hover:bg-bg-elevated'
                         )}
                       >

@@ -5,6 +5,7 @@ import { X, MessageSquare, ExternalLink } from 'lucide-react';
 import { useGraphStore, GraphNode } from '@/store/graph';
 import { entityColor } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface EntityDetail {
   description?: string;
@@ -54,9 +55,9 @@ export function EntityPanel({
           />
           <span className="font-semibold">{selected.name}</span>
         </div>
-        <button onClick={close} aria-label="Close" className="text-text-muted hover:text-text-primary">
-          <X className="h-5 w-5" />
-        </button>
+        <Button variant="ghost" size="icon" onClick={close} aria-label="Close">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-thin">
@@ -96,7 +97,7 @@ export function EntityPanel({
         <div className="border-t border-border p-4">
           <button
             onClick={() => onAsk(selected.name)}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent-violet px-4 py-2 text-sm font-medium text-white hover:bg-accent-violet/90"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent-primary px-4 py-2 text-sm font-medium text-white hover:bg-accent-primary/90"
           >
             <MessageSquare className="h-4 w-4" /> Ask about this entity
           </button>
