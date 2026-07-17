@@ -203,9 +203,9 @@ async def entrypoint(ctx: JobContext):
     # Build the session with STT → LLM → TTS pipeline
     session = AgentSession(
         stt=stt.FallbackAdapter(
-            [
+            [    
+                stt.StreamAdapter(stt=openai.STT(), vad=silero.VAD.load()),
                 inference.STT.from_model_string("deepgram/nova-3"),
-                inference.STT.from_model_string("assemblyai/universal-streaming:en"),
             ]            
         ),
 
@@ -213,8 +213,8 @@ async def entrypoint(ctx: JobContext):
 
         tts=tts.FallbackAdapter(
             [
+                openai.TTS(),
                 inference.TTS.from_model_string("cartesia/sonic-3"),
-                inference.TTS.from_model_string("openai/tts-1"),
             ]            
         ),
         vad=silero.VAD.load(),
