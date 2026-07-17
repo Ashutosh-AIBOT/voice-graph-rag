@@ -6,14 +6,14 @@ from django.apps import AppConfig
 logger = logging.getLogger(__name__)
 
 
-class GraphRAGConfig(AppConfig):
+class VoiceRAGConfig(AppConfig):
     """
     Django app configuration for the graphrag application.
     Handles startup recovery of stuck documents and initialization.
     """
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'graphrag'
-    verbose_name = 'GraphRAG Knowledge Graph'
+    verbose_name = 'VoiceRAG Knowledge Graph'
 
     def ready(self):
         """

@@ -47,7 +47,7 @@ export const useHistoryStore = create<HistoryState>()(
       resetLoaded: () => set({ loaded: false }),
     }),
     {
-      name: 'graphrag-query-history',
+      name: 'voicerag-query-history',
       storage: createJSONStorage(() => clientStorage),
     }
   )

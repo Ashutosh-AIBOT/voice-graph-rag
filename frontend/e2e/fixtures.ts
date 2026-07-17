@@ -1,12 +1,12 @@
 /**
- * Playwright fixtures for the GraphRAG E2E suite.
+ * Playwright fixtures for the VoiceRAG E2E suite.
  *
  * Design notes (determinism-first, per the test-automation contract):
  *  - We authenticate through the API, not the UI, because the live register
  *    form is currently broken (KNOWN GAP #1: backend requires `confirm_password`,
  *    frontend omits it). Seeding a session via the API keeps the journey tests
  *    (dashboard/explore/compare/communities/documents) independent of that bug.
- *  - The app persists auth in zustand under localStorage key `graphrag-auth`.
+ *  - The app persists auth in zustand under localStorage key `voicerag-auth`.
  *    We inject that shape before the app boots via `addInitScript` so every
  *    navigation rehydrates as an authenticated user. No hard sleeps anywhere.
  */
@@ -68,7 +68,7 @@ export async function seedAuth(
   await page.addInitScript(
     (token) => {
       localStorage.setItem(
-        'graphrag-auth',
+        'voicerag-auth',
         JSON.stringify({
           state: {
             user: { id: 0, username: token.username, email: token.email },

@@ -1,4 +1,4 @@
-# QA VERDICT — GraphRAG Knowledge Graph AI
+# QA VERDICT — VoiceRAG Knowledge Graph AI
 
 **Prepared by:** Evidence Collector + Reality Checker + Test Results Analyzer
 **Date:** 2026-07-09
@@ -7,7 +7,7 @@
 ---
 
 ## TL;DR
-The system is **functional at the API level** — registration (via API), upload, processing, hybrid/multi-hop QA, graph, compare, and communities all returned 200 with correct answers during E2E. However, it is **NOT submission-ready** because of defects that break the *user-facing* happy path and a documented API endpoint. The good news: the core GraphRAG pipeline demonstrably works (a correct multi-hop answer was produced), so the fixes are targeted, not architectural.
+The system is **functional at the API level** — registration (via API), upload, processing, hybrid/multi-hop QA, graph, compare, and communities all returned 200 with correct answers during E2E. However, it is **NOT submission-ready** because of defects that break the *user-facing* happy path and a documented API endpoint. The good news: the core VoiceRAG pipeline demonstrably works (a correct multi-hop answer was produced), so the fixes are targeted, not architectural.
 
 **Overall verdict: NOT submission-ready (conditional pass after top-3 fixes).**
 
@@ -18,7 +18,7 @@ The system is **functional at the API level** — registration (via API), upload
 | Criterion | Weight | Score | Realistic % | Rationale |
 |-----------|--------|-------|-------------|-----------|
 | Graph Quality | 25% | 17.5/25 | **70%** | Graph endpoint works (21 nodes, 12 edges, correct shape `edges`). But B4 edge-by-name fragility can silently drop edges, and B5 graph-only failed once. Quality is good but not robust. |
-| GraphRAG Retrieval | 25% | 18.75/25 | **75%** | QUERY + HYBRID returned 200 with a correct multi-hop answer — the headline feature works. Penalized because graph-only mode abstained on one query (B5) and has no graceful fallback. |
+| VoiceRAG Retrieval | 25% | 18.75/25 | **75%** | QUERY + HYBRID returned 200 with a correct multi-hop answer — the headline feature works. Penalized because graph-only mode abstained on one query (B5) and has no graceful fallback. |
 | Visualization | 15% | 9.75/15 | **65%** | Frontend builds & lints clean; all 8 routes 200; graph renders. Penalized for B1 (blocks entry), B3 (counts never shown), B2 (community detail broken if ever wired). |
 | Django & Neo4j | 15% | 12/15 | **80%** | Backend live, health healthy, endpoints functional, Cypher uses an allowlist + parameterized patterns (good injection hygiene). Penalized for B2 route bug and B4 robustness gap. |
 | Code Quality | 10% | 6.5/10 | **65%** | Clean FE lint/build; backend has tests + strict serializers. Penalized for clear FE/BE contract mismatches (B1, B3) and silent-failure patterns (B4). |

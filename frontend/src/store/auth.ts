@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
         useHistoryStore.getState().clear();
         useDocumentsStore.getState().clear();
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('graphrag-last-session');
+          localStorage.removeItem('voicerag-last-session');
         }
         set({
           user: null,
@@ -65,7 +65,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     { 
-      name: 'graphrag-auth',
+      name: 'voicerag-auth',
       storage: createJSONStorage(() => clientStorage),
     }
   )

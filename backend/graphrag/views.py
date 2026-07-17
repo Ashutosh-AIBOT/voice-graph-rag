@@ -366,7 +366,7 @@ class IsAuthenticatedOrVoiceAgent(BasePermission):
 
 class QueryView(APIView):
     """
-    Endpoint for executing GraphRAG queries.
+    Endpoint for executing VoiceRAG queries.
     Supports 'hybrid', 'vector', and 'graph' retrieval modes.
     Allows authenticated users OR voice agent with X-Voice-Agent-Secret header.
     """

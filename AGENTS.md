@@ -1,6 +1,6 @@
 # Voice-Graph-Rag — Complete Technical Specification (AGENTS.md)
 
-> **Project:** Voice-Graph-Rag — Voice-enabled GraphRAG with LiveKit + VRM Avatar
+> **Project:** Voice-Graph-Rag — Voice-enabled VoiceRAG with LiveKit + VRM Avatar
 > **Organization:** Excellence Technologies Pvt Ltd
 > **Phase:** Phase 2 — LangChain & Advanced RAG + Voice Agent Integration
 > **Version:** 1.0 (Comprehensive Spec)
@@ -322,7 +322,7 @@ flowchart TD
 ### Agent Tool: `query_knowledge_graph`
 
 ```python
-@llm.function_tool(description="MANDATORY: Query GraphRAG knowledge base...")
+@llm.function_tool(description="MANDATORY: Query VoiceRAG knowledge base...")
 async def query_knowledge_graph(self, question: str) -> str:
     # Payload sent to backend
     payload = {
@@ -961,7 +961,7 @@ async def save_context():
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-07-16 | Initial comprehensive spec: GraphRAG + Voice Agent + VRM Avatar |
+| 1.0 | 2026-07-16 | Initial comprehensive spec: VoiceRAG + Voice Agent + VRM Avatar |
 
 ---
 

@@ -413,7 +413,7 @@ export function GraphVisualization({
           <button
             onClick={() => {
               if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('graphrag:ask-entity', { detail: contextMenu.node.name }));
+                window.dispatchEvent(new CustomEvent('voicerag:ask-entity', { detail: contextMenu.node.name }));
               }
               closeContextMenu();
             }}

@@ -16,7 +16,7 @@ function titleForPath(pathname: string): string {
   const prefixMatch = allNavItems.find((item) => !('exact' in item) && pathname.startsWith(item.href));
   if (prefixMatch) return prefixMatch.label;
 
-  return 'GraphRAG';
+  return 'VoiceRAG';
 }
 
 export function TopBar({ title }: { title?: string }) {

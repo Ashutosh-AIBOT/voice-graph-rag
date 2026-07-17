@@ -1,4 +1,4 @@
-# EVIDENCE LOG — GraphRAG Knowledge Graph AI QA
+# EVIDENCE LOG — VoiceRAG Knowledge Graph AI QA
 
 **Reviewer role:** Evidence Collector + Reality Checker + Test Results Analyzer
 **Date:** 2026-07-09
@@ -18,7 +18,7 @@
 
 ### Method
 1. **Live E2E** (curl-driven, from consolidated evidence): register → login → upload → poll status → query/hybrid → graph → compare → communities.
-2. **Static review**: traced each claimed bug to the exact file/line in `backend/graphrag` and `frontend/src`.
+2. **Static review**: traced each claimed bug to the exact file/line in `backend/voicerag` and `frontend/src`.
 3. **Reality-check**: separ\ated genuine backend defects from a script-parsing artifact (the "0 edges" false alarm).
 
 ---
@@ -48,7 +48,7 @@ Frontend route check: all 8 routes return HTTP 200; `next build` and `next lint`
 
 **Finding:** FALSE POSITIVE (script error, not a product defect).
 - The test script looked for a `links` key in the graph response.
-- The backend actually returns the key `edges` (confirmed in `graphrag/services/graph_retriever.py:106` → `"edges": edges` and `neo4j_client.get_all_graph_data` returns `edges`).
+- The backend actually returns the key `edges` (confirmed in `voicerag/services/graph_retriever.py:106` → `"edges": edges` and `neo4j_client.get_all_graph_data` returns `edges`).
 - Live GRAPH call returned **12 edges** under the correct `edges` key.
 
 **Conclusion:** Do **not** record "0 edges" as a bug. It was a client-side key-name mismatch in the test harness. The graph endpoint is correct.
@@ -59,9 +59,9 @@ Frontend route check: all 8 routes return HTTP 200; `next build` and `next lint`
 
 | Bug | Claim | Verified at | Result |
 |-----|-------|-------------|--------|
-| B1 | Frontend register omits `confirm_password` | `frontend/src/app/(auth)/register/page.tsx:29-33` sends `{username,email,password}` only; `backend/graphrag/serializers.py:24` requires `confirm_password` (`required=True`) | **CONFIRMED** |
-| B2 | Community detail route `<int:community_id>` vs string label id | `backend/graphrag/urls.py:59` = `<int:community_id>/`; list `id` is a label-propagation string (`community_detector.py:73` `"id": comm_id`); `CommunityDetailView.get` does `int(community_id)` | **CONFIRMED** |
-| B3 | Document id UUID vs FE `number`; count field mismatch | `backend/graphrag/models.py:27` `id = UUIDField(primary_key=True)`; `DocumentSerializer` returns `entity_count`/`relationship_count` (`serializers.py:83`); FE `src/store/documents.ts:6,9,10` types `id: number`, `entities?`, `relationships?`; `DocumentRow.tsx:49-50` reads `doc.entities`/`doc.relationships` | **CONFIRMED** |
+| B1 | Frontend register omits `confirm_password` | `frontend/src/app/(auth)/register/page.tsx:29-33` sends `{username,email,password}` only; `backend/voicerag/serializers.py:24` requires `confirm_password` (`required=True`) | **CONFIRMED** |
+| B2 | Community detail route `<int:community_id>` vs string label id | `backend/voicerag/urls.py:59` = `<int:community_id>/`; list `id` is a label-propagation string (`community_detector.py:73` `"id": comm_id`); `CommunityDetailView.get` does `int(community_id)` | **CONFIRMED** |
+| B3 | Document id UUID vs FE `number`; count field mismatch | `backend/voicerag/models.py:27` `id = UUIDField(primary_key=True)`; `DocumentSerializer` returns `entity_count`/`relationship_count` (`serializers.py:83`); FE `src/store/documents.ts:6,9,10` types `id: number`, `entities?`, `relationships?`; `DocumentRow.tsx:49-50` reads `doc.entities`/`doc.relationships` | **CONFIRMED** |
 | B4 | Edges matched/written by name string (drift fragility) | Write: `neo4j_client.create_relationship_edge` `MATCH (source:Entity {name:,user_id:}) MATCH (target:Entity {name:,user_id:}) MERGE` (`neo4j_client.py:142-144`); Read: `graph_retriever.get_graph_as_json` drops edge if `source_id/target_id is None` (`graph_retriever.py:106-109`) | **CONFIRMED** |
 | B5 | Graph-only retrieval "I do not know" for one query | Consequence of B4 name-mismatch: subgraph lookup by query-entity name fails on drift → empty context → abstain | **CONFIRMED (consistent with B4)** |
 

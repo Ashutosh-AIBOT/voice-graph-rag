@@ -20,7 +20,7 @@ export function LandingPage() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white shadow-sm">
               <Network className="h-3.5 w-3.5" />
             </div>
-            <span className="text-base font-semibold tracking-tight">GraphRAG</span>
+            <span className="text-base font-semibold tracking-tight">VoiceRAG</span>
           </Link>
           <nav className="flex items-center gap-2 text-sm">
             <Link href="#features" className="hidden rounded-lg px-3 py-1.5 text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary sm:inline">

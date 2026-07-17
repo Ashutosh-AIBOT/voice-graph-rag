@@ -121,7 +121,7 @@ export function Sidebar() {
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white shadow-sm">
             <Network className="h-3.5 w-3.5" />
           </div>
-          <span className="text-base font-semibold tracking-tight">GraphRAG</span>
+          <span className="text-base font-semibold tracking-tight">VoiceRAG</span>
         </div>
 
         {/* Navigation */}
@@ -162,7 +162,7 @@ export function Sidebar() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-accent-primary to-accent-cyan text-white">
               <Network className="h-3 w-3" />
             </div>
-            <span className="text-sm font-semibold">GraphRAG</span>
+            <span className="text-sm font-semibold">VoiceRAG</span>
           </div>
         </div>
         <ThemeToggle />
@@ -178,7 +178,7 @@ export function Sidebar() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white">
                   <Network className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-base font-semibold">GraphRAG</span>
+                <span className="text-base font-semibold">VoiceRAG</span>
               </div>
               <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-1.5 rounded-lg hover:bg-bg-elevated transition-colors">
                 <X className="h-5 w-5" />

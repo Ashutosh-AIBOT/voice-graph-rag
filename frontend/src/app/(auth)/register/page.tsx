@@ -112,7 +112,7 @@ export default function RegisterPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white shadow-sm">
                 <Network className="h-4 w-4" />
               </div>
-              <span className="text-lg font-semibold tracking-tight">GraphRAG</span>
+              <span className="text-lg font-semibold tracking-tight">VoiceRAG</span>
             </Link>
             <ThemeToggle />
           </div>
