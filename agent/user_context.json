@@ -1,139 +1,16 @@
 {
-  "b85795fc-587a-4b32-a1fa-5d0f5ebba984": [
-    {
-      "role": "user",
-      "content": "Tell me properly. tell me properly"
-    },
-    {
-      "role": "assistant",
-      "content": "Transformers are neural network architectures used in natural language processing, introduced in the 2017 paper \"Attention Is All You Need\". They process sequential data using techniques like self-attention and multi-head attention, allowing efficient handling of text or speech. While there's no direct connection to farmers, technology like this can potentially aid in agricultural advancements through data analysis and similar applications."
-    },
-    {
-      "role": "user",
-      "content": "The answer."
-    },
-    {
-      "role": "user",
-      "content": "Again."
-    },
-    {
-      "role": "user",
-      "content": "the answer again"
-    },
-    {
-      "role": "user",
-      "content": "Transformers in machine learning."
-    },
-    {
-      "role": "user",
-      "content": "Tell me about tranq."
-    },
-    {
-      "role": "user",
-      "content": "Yeah. Tell me about transformer and how transformer works."
-    },
-    {
-      "role": "assistant",
-      "content": "A transformer is a neural network architecture introduced in the 2017 paper \"Attention Is All You Need\" by Vaswani et al. It's designed for tasks like machine translation and text summarization. The transformer uses self-attention mechanisms to handle input sequences, allowing it to consider various parts of the sequence simultaneously, unlike traditional RNNs and CNNs. It has an encoder and a decoder that work together to process and generate sequences, and it is known for its parallelization capabilities and adaptability to different tasks."
-    }
-  ],
   "eeb83fe1-e15e-43f9-bdf3-1b83667920e0": [
     {
-      "role": "assistant",
-      "content": "Hi! Yes, I'm here and listening. How can I assist you today?"
+      "role": "user",
+      "content": "Hallo."
     },
     {
       "role": "user",
-      "content": "Okay."
-    },
-    {
-      "role": "user",
-      "content": "How does that work?"
-    },
-    {
-      "role": "user",
-      "content": "Is the main part of"
-    },
-    {
-      "role": "user",
-      "content": "Yes. Yes."
+      "content": "Are you listening to me?"
     },
     {
       "role": "assistant",
-      "content": "The main part of the Transformer"
-    },
-    {
-      "role": "user",
-      "content": "Tell me. Or let me"
-    },
-    {
-      "role": "assistant",
-      "content": "Hi there! How can I assist you today?"
-    },
-    {
-      "role": "user",
-      "content": "Just tell me that your wife is equals."
-    },
-    {
-      "role": "assistant",
-      "content": "Could you please provide more context or clarify your question? I'm not sure I understand what you're asking."
-    },
-    {
-      "role": "user",
-      "content": "Okay."
-    },
-    {
-      "role": "assistant",
-      "content": "Great! Feel free"
-    },
-    {
-      "role": "user",
-      "content": "There is some issue."
-    },
-    {
-      "role": "assistant",
-      "content": "I'm here to help. Could you please describe the issue you're experiencing?"
-    },
-    {
-      "role": "user",
-      "content": "When I talking to you, just to you, give me some feedback and then the same time, another agent talked to me. Like, at same time, two agents talk to me. That's the same issue."
-    },
-    {
-      "role": "user",
-      "content": "And again and again."
-    },
-    {
-      "role": "assistant",
-      "content": "I'm sorry to hear that you're experiencing this issue. Could you please provide any additional details or steps that led to this problem? This will help me understand and address your concern better."
-    },
-    {
-      "role": "user",
-      "content": "You no need to address better than anything."
-    },
-    {
-      "role": "assistant",
-      "content": "Alright, if there's anything specific you'd like help with or discuss, feel free to let me know!"
-    }
-  ]
-}   {
-      "role": "user",
-      "content": "When I talking to you, just to you, give me some feedback and then at the same time, another agent talked to me. Like, at same time, two agents talk to me. The same issue."
-    },
-    {
-      "role": "user",
-      "content": "Went again and again."
-    },
-    {
-      "role": "assistant",
-      "content": "I'm sorry to hear about the overlapping responses. It might be a technical glitch. I'll do my best to ensure clear communication from my side. Can I assist you with any specific questions or information right now?"
-    },
-    {
-      "role": "user",
-      "content": "You no need to address better than anything."
-    },
-    {
-      "role": "assistant",
-      "content": "Alright, just let me know if there's anything specific you'd like to discuss or ask about. I'm here to help!"
+      "content": "Yes, I'm here and ready to help. How can I assist you today?"
     }
   ]
 }
