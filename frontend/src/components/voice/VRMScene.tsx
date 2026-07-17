@@ -484,7 +484,7 @@ export default function VRMScene({ avatarUrl, state, audioMetrics }: VRMScenePro
 
         if (vrm.lookAt) {
           vrm.lookAt.target = new THREE.Object3D();
-          vrm.lookAt.target.position.set(0, 1.12, 1.0);
+          vrm.lookAt.target.position.set(0, 1.2, 2.0);
         }
 
         setLoading(false);

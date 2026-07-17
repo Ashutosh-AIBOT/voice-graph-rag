@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  GraphRAG — End-to-End UI Suite (Playwright)
+ *  VoiceRAG — End-to-End UI Suite (Playwright)
  * ============================================================================
  *
  *  WHAT THIS SUITE COVERS (full critical-journey flow against the live stack):
@@ -14,7 +14,7 @@
  *    3. Install the runner:  npm install   (adds @playwright/test)
  *                            npx playwright install chromium
  *    4. Run the suite:       npm run test:e2e
- *       Run one file:        npx playwright test e2e/graphrag.spec.ts
+ *       Run one file:        npx playwright test e2e/voicerag.spec.ts
  *       Repeat to prove determinism (no sleeps → should be green 10x):
  *                            npx playwright test --repeat-each=10
  *       Headed / debug:      npx playwright test --project=chromium --headed

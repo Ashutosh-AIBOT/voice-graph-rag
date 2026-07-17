@@ -84,7 +84,7 @@ export const useDocumentsStore = create<DocumentsState>()(
       clear: () => set({ documents: [], activeJobs: 0, selectedDocumentIds: [] }),
     }),
     {
-      name: 'graphrag-selected-documents',
+      name: 'voicerag-selected-documents',
       partialize: (state) => ({ selectedDocumentIds: state.selectedDocumentIds }),
       storage: createJSONStorage(() => clientStorage),
     }

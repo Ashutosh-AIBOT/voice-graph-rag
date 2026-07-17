@@ -1,5 +1,5 @@
 """
-Comprehensive E2E Test Suite for GraphRAG Knowledge AI Backend.
+Comprehensive E2E Test Suite for VoiceRAG Knowledge AI Backend.
 
 Covers: Authentication, Document Management, Query, Graph, Error Handling,
 and Security concerns. All external services (Neo4j, LLM, ChromaDB) are mocked
@@ -469,7 +469,7 @@ class DocumentManagementTests(APITestCase):
 # ===========================================================================
 
 class QueryTests(APITestCase):
-    """Tests for /api/query/ (GraphRAG query endpoint)."""
+    """Tests for /api/query/ (VoiceRAG query endpoint)."""
 
     def setUp(self):
         self.user = _create_user(username="queryuser", email="queryuser@gmail.com")
@@ -482,11 +482,11 @@ class QueryTests(APITestCase):
         mock_rag = mock_rag_cls.return_value
         mock_rag.generate_answer.return_value = {
             "success": True,
-            "answer": "GraphRAG combines graph and vector retrieval.",
+            "answer": "VoiceRAG combines graph and vector retrieval.",
             "sources": [],
         }
 
-        response = self.client.post(self.url, {"query": "What is GraphRAG?"}, format="json")
+        response = self.client.post(self.url, {"query": "What is VoiceRAG?"}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["success"])
@@ -1136,12 +1136,12 @@ class QueryLogModelTests(APITestCase):
         """QueryLog can be created and string representation is correct."""
         log = QueryLog.objects.create(
             user=self.user,
-            query_text="What is GraphRAG?",
+            query_text="What is VoiceRAG?",
             retrieval_mode=QueryLog.RetrievalMode.HYBRID,
-            answer_text="GraphRAG is a retrieval-augmented generation system.",
+            answer_text="VoiceRAG is a retrieval-augmented generation system.",
             response_time=1.23,
         )
-        self.assertIn("What is GraphRAG?", str(log))
+        self.assertIn("What is VoiceRAG?", str(log))
         self.assertEqual(log.response_time, 1.23)
 
     def test_query_log_default_mode(self):

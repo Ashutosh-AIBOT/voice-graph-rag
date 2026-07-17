@@ -107,7 +107,7 @@ class GraphBuilder:
 
     def process_document(self, document_id, user_id):
         """
-        Orchestrates the entire GraphRAG ingestion pipeline.
+        Orchestrates the entire VoiceRAG ingestion pipeline.
         Reads file, extracts entities & relationships, resolves duplicates, and writes to Neo4j.
         Updates processing_progress and processing_step at each stage for frontend polling.
         """

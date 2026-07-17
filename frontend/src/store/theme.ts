@@ -31,7 +31,7 @@ export const useThemeStore = create<ThemeState>()(
       setTheme: (theme) => set({ theme }),
     }),
     {
-      name: 'graphrag-theme',
+      name: 'voicerag-theme',
       storage: createJSONStorage(() => clientStorage),
     }
   )

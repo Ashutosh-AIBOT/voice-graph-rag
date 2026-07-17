@@ -10,7 +10,7 @@ export function Footer() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white">
               <Network className="h-3.5 w-3.5" />
             </div>
-            <p className="text-sm font-semibold tracking-tight">GraphRAG</p>
+            <p className="text-sm font-semibold tracking-tight">VoiceRAG</p>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-text-muted">
             Knowledge graphs made simple. AI-powered document understanding.
@@ -43,7 +43,7 @@ export function Footer() {
       </div>
 
       <div className="flex items-center justify-between border-t border-border px-6 py-4 text-xs text-text-muted">
-        <span>© 2026 GraphRAG. All rights reserved.</span>
+        <span>© 2026 VoiceRAG. All rights reserved.</span>
         <div className="flex gap-1.5">
           {[Github, Twitter, Linkedin].map((Icon, i) => (
             <a

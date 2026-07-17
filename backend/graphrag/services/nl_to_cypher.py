@@ -38,7 +38,7 @@ class NLToCypher:
 
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", (
-                "You are an expert Neo4j Cypher query generator for a GraphRAG knowledge system.\n"
+                "You are an expert Neo4j Cypher query generator for a VoiceRAG knowledge system.\n"
                 "Your task is to convert a user's natural language question into a syntactically correct, read-only Cypher query.\n\n"
                 "=== DATABASE SCHEMA ===\n"
                 "Nodes:\n"

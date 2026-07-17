@@ -51,13 +51,13 @@ export default function LoginPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-primary to-accent-cyan text-white shadow-sm">
                 <Network className="h-4 w-4" />
               </div>
-              <span className="text-lg font-semibold tracking-tight">GraphRAG</span>
+              <span className="text-lg font-semibold tracking-tight">VoiceRAG</span>
             </Link>
             <ThemeToggle />
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-          <p className="mt-2 text-sm text-text-secondary">Sign in to your GraphRAG account</p>
+          <p className="mt-2 text-sm text-text-secondary">Sign in to your VoiceRAG account</p>
 
           <form onSubmit={submit} className="mt-8 space-y-5">
             <div>

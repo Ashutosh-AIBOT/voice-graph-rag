@@ -29,7 +29,7 @@ interface QueryResult {
   conclusion?: string;
 }
 
-const LAST_SESSION_KEY = 'graphrag-last-session';
+const LAST_SESSION_KEY = 'voicerag-last-session';
 
 function loadLastSession(): { query: string; mode: QueryMode; result: QueryResult | null } | null {
   try {
@@ -91,8 +91,8 @@ export function MainQueryView() {
       const name = (e as CustomEvent).detail;
       if (name) setQuery(name);
     }
-    window.addEventListener('graphrag:ask-entity', handleAskEntity);
-    return () => window.removeEventListener('graphrag:ask-entity', handleAskEntity);
+    window.addEventListener('voicerag:ask-entity', handleAskEntity);
+    return () => window.removeEventListener('voicerag:ask-entity', handleAskEntity);
   }, []);
 
   const scrollToAnswer = useCallback(() => {

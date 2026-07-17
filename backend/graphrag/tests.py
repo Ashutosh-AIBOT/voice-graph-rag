@@ -12,7 +12,7 @@ from .services.graph_builder import GraphBuilder
 
 User = get_user_model()
 
-class GraphRAGTests(APITestCase):
+class VoiceRAGTests(APITestCase):
 
     def setUp(self):
         # Create a default test user

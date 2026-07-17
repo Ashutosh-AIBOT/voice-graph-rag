@@ -1,5 +1,5 @@
 ---
-title: GraphRAG Knowledge AI Backend
+title: VoiceRAG Knowledge AI Backend
 emoji: 🤖
 colorFrom: blue
 colorTo: indigo
@@ -8,9 +8,9 @@ app_port: 8000
 pinned: false
 ---
 
-# GraphRAG Knowledge AI Backend
+# VoiceRAG Knowledge AI Backend
 
-This is the backend service for the GraphRAG Knowledge AI Platform built using Django, Django REST Framework, Neo4j, and ChromaDB.
+This is the backend service for the VoiceRAG Knowledge AI Platform built using Django, Django REST Framework, Neo4j, and ChromaDB.
 
 ## Running Locally
 

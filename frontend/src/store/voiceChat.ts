@@ -134,7 +134,7 @@ export const useVoiceChatStore = create<VoiceChatState>()(
       },
     }),
     {
-      name: 'graphrag-voice-chat-history',
+      name: 'voicerag-voice-chat-history',
       storage: createJSONStorage(() => clientStorage),
     }
   )
